@@ -5,7 +5,6 @@
 - ox_lib - https://github.com/overextended/ox_lib
 - ox_inventory - https://github.com/overextended/ox_inventory
  
-
 # 💻 Installation 
 
 - It is important to use the latest Gamebuild version.
