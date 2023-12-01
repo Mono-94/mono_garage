@@ -12,7 +12,7 @@ for impound, data in pairs(Garages.Impound) do
         exports.ox_target:addLocalEntity(ImpoundPed, {
             {
                 name = 'mono_garage:TargetNpc_impound',
-                distance = 5,
+                distance = Garages.TargetDistance,
                 icon = 'fas fa-car',
                 label = impound,
                 onSelect = function()
@@ -103,10 +103,10 @@ function VehicleImpoundSelec(data)
         title = data.nameCar .. ' ' .. data.markCar,
         options = {
             {
-                title = 'Solicitar vehiculo',
+                title = Text('CustomGarage2',data.nameCar .. ' ' .. data.markCar),
                 icon = 'car-side',
                 onSelect = function()
-                    local input = lib.inputDialog('Metodo de pago', {
+                    local input = lib.inputDialog(Text('SelectPaidType'), {
                         {
                             type = 'select',
                             icon = 'dollar',
@@ -133,12 +133,12 @@ function VehicleImpoundSelec(data)
     lib.showContext('mono_garage:VehicleSelect_impound')
 end
 
-for i = 1, #Garages.ImpoundCommand.jobs do
+for i = 1, #Garages.ImpoundTarget.jobs do
     local options = {
         {
             icon = 'fa-solid fa-car-on',
-            label = 'Impound vehicle',
-            groups = Garages.ImpoundCommand.jobs[i],
+            label = Text('SendImpound'),
+            groups = Garages.ImpoundTarget.jobs[i],
             canInteract = function(entity, distance, coords, name, bone)
                 vehicle = {
                     entity = entity,
@@ -146,7 +146,7 @@ for i = 1, #Garages.ImpoundCommand.jobs do
                     coords = coords,
                     name = name,
                     bone = bone,
-                    job = Garages.ImpoundCommand.jobs[i]
+                    job = Garages.ImpoundTarget.jobs[i]
                 }
                 return vehicle
             end,
@@ -157,31 +157,6 @@ for i = 1, #Garages.ImpoundCommand.jobs do
     }
     exports.ox_target:addGlobalVehicle(options)
 end
-
-RegisterCommand(Garages.ImpoundCommand.Command, function()
-    local trabajo = false
-    local noti = false
-    for k, v in pairs(Garages.ImpoundCommand.jobs) do
-        if ESX.PlayerData.job.name == v then
-            trabajo = true
-            local entity, coords = lib.getClosestVehicle(cache.coords, 3.0, true)
-            local veh = { coords = coords, entity = entity, job = v }
-            if coords then
-                ImpoundVehicle(veh)
-            else
-                if not noti then
-                    TriggerEvent('mono_garage:Notification', 'no_veh_nearby')
-                    noti = true
-                end
-            end
-        end
-    end
-
-    if not trabajo and not noti then
-        TriggerEvent('mono_garage:Notification', 'impound3')
-        noti = true
-    end
-end)
 
 function ImpoundVehicle(vehicle)
     local props = lib.getVehicleProperties(vehicle.entity)
@@ -196,8 +171,7 @@ function ImpoundVehicle(vehicle)
         end
     end
 
-    local vehiclename = GetMakeNameFromVehicleModel(props.model) ..
-        ' - ' .. GetDisplayNameFromVehicleModel(props.model)
+    local vehiclename = GetMakeNameFromVehicleModel(props.model) ..' - ' .. GetDisplayNameFromVehicleModel(props.model)
 
     local input = lib.inputDialog(Text('SetImpound1'), {
         {
@@ -261,7 +235,7 @@ function ImpoundVehicle(vehicle)
     if not input then return end
 
     if lib.progressBar({
-            duration = Garages.ImpoundCommand.ProgressBarTime,
+            duration = Garages.ImpoundTarget.ProgressBarTime,
             label = Text('SetImpound6'),
             useWhileDead = false,
             canCancel = true,

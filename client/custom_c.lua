@@ -10,7 +10,7 @@ for garage, data in pairs(Garages.Customs) do
             {
                 name = 'mono_garage:OpenCustomGarage',
                 groups = data.job,
-                distance = 5,
+                distance = Garages.TargetDistance,
                 group = data.job,
                 icon = 'fas fa-car',
                 label = Text('TargetPedOpen', garage),
@@ -25,7 +25,7 @@ for garage, data in pairs(Garages.Customs) do
                 icon = 'fa-solid fa-road',
                 label = Text('TargetPedDeposit', garage),
                 groups = data.job,
-                distance = 5,
+                distance = Garages.TargetDistance,
                 canInteract = function(entity, distance, coords, name, bone)
                     for k, v in pairs(data.vehicles) do
                         if PlateEqual(v.plate, GetVehicleNumberPlateText(entity)) then

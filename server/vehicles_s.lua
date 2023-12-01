@@ -104,6 +104,7 @@ function GetOwnerVehicles(source)
 
         result.isOwner = isOwner
         result.isFriend = isFriend
+        result.OwnerName = ESX.GetPlayerFromIdentifier(result.owner).getName()
     end
 
     return vehicles

@@ -216,7 +216,7 @@ lib.addCommand(Garages.Commands.GiveCar, {
             plate = props.plate,
             coords = spawncoords,
             props = props,
-            source = source,
+            source = args.target,
             owner = args.owner,
             type = args.type,
             intocar = true

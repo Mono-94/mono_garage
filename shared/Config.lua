@@ -1,43 +1,46 @@
-Garages                    = {}
+Garages                   = {}
 
-Garages.Lang               = 'EN' -- ES/EN/PL/FR/IT/PT
+Garages.Lang              = 'ES'  -- ES/EN/PL/FR/IT/PT
 
-Garages.Debug              = false
+Garages.Debug             = false
 
-Garages.DefaultGarage      = {
+Garages.TargetDistance    = 2
+
+Garages.DefaultGarage     = {
     ['car'] = 'Pillbox Hill',
     ['boat'] = 'La Puerta Boat',
     ['air'] = 'Aeropuerto INYL. de los Santos Air',
 }
 
-Garages.DefaultImpound     = {
+Garages.DefaultImpound    = {
     ['car'] = 'LSPD Impound',
     ['boat'] = 'Boat Impound',
     ['air'] = 'AirCraft Impound',
 }
 
-Garages.VehicleCategories  = {
+Garages.VehicleCategories = {
     ['car'] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 19, 13, 20, 18 },
     ['boat'] = { 14 },
     ['air'] = { 15, 16 },
 }
 
-Garages.Commands           = {
+Garages.Commands          = {
     GiveCar = 'givecar',
     DelDataBasePlate = 'delplate',
     carTimer = 'cartimer',
     sendAll = 'sendAll'
 }
 
-Garages.Buttons            = {
+Garages.Buttons           = {
     carkeys = 'U',
     engine = 'M'
 }
 
-Garages.CarKeys            = {
+Garages.CarKeys           = {
     isItem = true,
     engine = true, -- only work isItem = true
 }
+
 
 Garages.VehicleEntitys     = {
     CloseAllDoors = true,
@@ -54,7 +57,7 @@ Garages.AutoImpound        = {
     Reason = 'Mono Garage Impound'
 }
 
-Garages.ImpoundCommand     = {
+Garages.ImpoundTarget     = {
     Command = 'impound',
     ProgressBarTime = 5000,
     jobs = {
@@ -81,13 +84,13 @@ Garages.LockPickAndHotWire = {
     LockPickAlarmAndDispatchProbablity = 0.5,
     LockPickSkillCheck = {
         { 'easy', 'easy', 'easy', 'easy', 'easy', 'easy', 'easy', 'easy' },
-        { 'e',    'e',    'e',    'e',    'e',    'e',    'e',    'e',   }
+        { 'e',    'e',    'e',    'e',    'e',    'e',    'e',    'e', }
     },
     -- HotWire
     HotWireAlarmProbablity = 0.5,
     HotWireSkillCheck = {
         { 'easy', 'easy', 'easy', 'easy', 'easy', 'easy', 'easy', 'easy' },
-        { 'e',    'e',    'e',    'e',    'e',    'e',    'e',    'e',   }
+        { 'e',    'e',    'e',    'e',    'e',    'e',    'e',    'e', }
     },
 }
 

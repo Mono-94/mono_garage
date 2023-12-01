@@ -17,7 +17,7 @@ for garage, data in pairs(Garages.Garages) do
             {
                 name = 'mono_garage:OpenGarage',
                 groups = data.job,
-                distance = 5,
+                distance = Garages.TargetDistance,
                 group = data.job,
                 icon = 'fas fa-car',
                 label = Text('TargetPedOpen', garage),
@@ -32,7 +32,7 @@ for garage, data in pairs(Garages.Garages) do
                 icon = 'fa-solid fa-road',
                 label = Text('TargetPedDeposit', garage),
                 groups = data.job,
-                distance = 5,
+                distance = Garages.TargetDistance,
                 canInteract = function(entity, distance, coords, name, bone)
                     if data.type == GetVehicleCategory(entity) then
                         return entity, distance, coords, name, bone
@@ -116,7 +116,7 @@ function OpenGarage(data)
                 },
                 colorScheme = '#4ac76b',
                 description = vehicle.isOwner and Text('OwnerVehicle', props.plate) or
-                    Text('NotOwnerVehicle', props.plate),
+                    Text('NotOwnerVehicle',vehicle.OwnerName, props.plate),
                 onSelect = function()
                     data.nameCar = nameCar
                     data.markCar = markCar
