@@ -20,7 +20,7 @@
 - Verification of duplicate vehicles.
 - Ensures that a spawned vehicle in the garage always exists; otherwise, it will be sent to the impound.
 - Command to spawn a vehicle with the option to add it as property to the database.
-- Command to remove a license plate from the database.
+- Command to remove a plate from the database.
 - Command to spawn a vehicle with a timer to be removed after a specific time.
 - Command to send all vehicles of a type ("all", "air", "car", "boat") to a default garage.
 - Export *(Client/Server)* to create or delete keys.
@@ -30,7 +30,7 @@
 - Keys work as items or through the database-> (50%).
 - Mark vehicle on the map if it's outside.
 - Send the vehicle to the impound if it's outside.
-- Fake license plate/FakePlate system, an item that sets a fake license plate with a timer to a owned vehicle. (You can store the vehicle with the fake license plate.)
+- FakePlate system, an item that sets a fake  plate with a timer to a owned vehicle. (You can store the vehicle with the fakeplate.)
 - Target to send vehicles to the impound.
 
 
@@ -38,7 +38,7 @@
 - ### /givecar [ID] [MODEL] [TYPE] [true/fale]  
 - - **ID** = source player
 - - **MODEL** = Vehicle Model 
-- - **MODEL** = car | air | boat
+- - **MODEL** = car | air | boat If owner  true
 - - **BOOLEAN** = (Optional) Set Vehicle owner true, false only spawn default.
 - ### /delplate [PLATE]  
 - - **PLATE** = Borrar vehiculo de la base de datos por la matricula. (Escribir sin espacios la matricula)

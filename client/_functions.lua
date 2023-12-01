@@ -150,6 +150,7 @@ exports('GetPlayerKey', GetPlayerKey)
 
 function VehicleDoors()
     local haveKey, entity, inCar, ped = GetPlayerKey()
+    
     if not haveKey or not DoesEntityExist(entity) then return end
 
     local nameCar = GetDisplayNameFromVehicleModel(GetEntityModel(entity))
@@ -157,9 +158,10 @@ function VehicleDoors()
     local marca = CapitalizeFirstLetter(nameCar .. ' - ' .. markCar)
 
     lib.callback('mono_garage:CarDoors', Garages.CarKeys.CarKeyDelay, function(success)
+
         if success then
             local doorLockStatus = GetVehicleDoorLockStatus(entity)
-
+          
             Entity(entity).state.VehicleDoors = doorLockStatus == 2 and 0 or 2
             PlayVehicleDoorCloseSound(entity, 1)
             local soundEvent = doorLockStatus == 2 and "Remote_Control_Close" or "Remote_Control_Fob"

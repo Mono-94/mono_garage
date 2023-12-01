@@ -149,9 +149,10 @@ lib.callback.register('mono_garage:SpawnOwnerVehicle_impound', function(source, 
 end)
 
 lib.callback.register('mono_garage:CarDoors', function(source, action, entity)
+
     local vehicle = NetworkGetEntityFromNetworkId(entity)
     local plate = GetVehicleNumberPlateText(vehicle)
-    if action then
+    if not action then
         local Owner = GetOwnerVehicles(source)
         for i = 1, #Owner do
             local vehicles = Owner[i]

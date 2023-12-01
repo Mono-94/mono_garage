@@ -181,6 +181,7 @@ lib.addCommand(Garages.Commands.GiveCar, {
             name = 'type',
             type = 'string',
             help = Text('CommandParamsType'),
+            optional = true,
         },
         {
             name = 'owner',
