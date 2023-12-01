@@ -60,7 +60,7 @@ function OpenImpound(data)
             local nameCar = GetDisplayNameFromVehicleModel(props.model)
             local markCar = GetMakeNameFromVehicleModel(props.model)
             table.insert(garagemenu, {
-                title = markCar .. ' - ' .. nameCar,
+                title = CapitalizeFirstLetter(markCar .. ' - ' .. nameCar),
                 icon = 'car',
                 iconColor = '#32a852' or '#FF8787',
                 arrow = true,
@@ -100,7 +100,7 @@ function VehicleImpoundSelec(data)
     lib.registerContext({
         id = 'mono_garage:VehicleSelect_impound',
         menu = 'mono_garage:owned_vehicles_impound',
-        title = data.nameCar .. ' ' .. data.markCar,
+        title = CapitalizeFirstLetter(data.nameCar .. ' ' .. data.markCar),
         options = {
             {
                 title = Text('CustomGarage2',data.nameCar .. ' ' .. data.markCar),

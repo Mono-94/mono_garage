@@ -9,10 +9,10 @@ lib.callback.register('mono_garage:GetSpawnedVehicles', function()
     local data = {}
     for plate, veh in pairs(Vehicles) do
         data[plate] = veh
-        data.vec3 = GetEntityCoords(veh.entity)
-        data.heading = GetEntityHeading(veh.entity)
+        data[plate].vec3 = GetEntityCoords(veh.entity)
+        data[plate].heading = GetEntityHeading(veh.entity)
         data[plate].netId = NetworkGetNetworkIdFromEntity(veh.entity)
-        data[plate].vec4 = vec4(data.vec3.x, data.vec3.y, data.vec3.z, data.heading)
+        data[plate].vec4 = vec4(data[plate].vec3.x, data[plate].vec3.y, data[plate].vec3.z, data[plate].heading)
     end
     return data
 end)
@@ -45,7 +45,7 @@ function CreateVehicleServer(data, cb)
             wait(0)
         end
 
-        Vehicles[data.plate] = { entity = data.entity }
+        Vehicles[data.plate] = { entity = data.entity, plate = data.plate }
 
 
         if data.owner then
@@ -72,14 +72,14 @@ function CreateVehicleServer(data, cb)
     end)
 end
 
-local insertSetOwnerQuery = 'INSERT INTO `owned_vehicles` (owner, plate, vehicle, parking, type) VALUES (?, ?, ?, ?, ?)'
+local insertSetOwnerQuery = 'INSERT INTO `owned_vehicles` (owner, plate, vehicle, parking, type, job) VALUES (?, ?, ?, ?, ?, ?)'
 --- Set Vehicle owner
 ---@param data any
 ---@return unknown
 function SetOwner(data)
     local player = ESX.GetPlayerFromId(data.source)
     local SetOwner = MySQL.insert.await(insertSetOwnerQuery,
-        { player.identifier, data.plate, json.encode(data.props), Garages.DefaultGarage[data.type], data.type })
+        { player.identifier, data.plate, json.encode(data.props), Garages.DefaultGarage[data.type], data.type, data.job })
     return SetOwner
 end
 
@@ -115,8 +115,7 @@ function GetOwnerVehicles(source)
 end
 
 local selectSpawnOwnertQuery = "SELECT * FROM `owned_vehicles` WHERE `plate` = ?"
-local updateSpawnOwnerQuery =
-"UPDATE `owned_vehicles` SET `stored` = 0, `pound` = NULL, `lastparking` = ? WHERE `plate` = ?"
+local updateSpawnOwnerQuery = "UPDATE `owned_vehicles` SET `stored` = 0, `pound` = NULL, `lastparking` = ? WHERE `plate` = ?"
 --- Spawn Vehicle
 ---@param data any plate/name garage
 ---@param cb function
@@ -138,8 +137,7 @@ function SpawnOwnerVehicle(data, cb)
 end
 
 local selectSpawnOwnerVehicleImpoundQuery = "SELECT * FROM `owned_vehicles` WHERE `plate` = ?"
-local updateSpawnOwnerVehicleImpoundQuery =
-"UPDATE `owned_vehicles` SET pound = NULL, `parking` = ?, `infoimpound` = NULL WHERE `plate` = ?"
+local updateSpawnOwnerVehicleImpoundQuery = "UPDATE `owned_vehicles` SET pound = NULL, `parking` = ?, `infoimpound` = NULL WHERE `plate` = ?"
 --- Spawn Vehicle Impound
 ---@param data any plate/name garage
 ---@param cb function
@@ -162,7 +160,7 @@ end
 
 local selectStoreOwnerVehicleQuery = "SELECT * FROM `owned_vehicles` WHERE `owner` = ? OR `friends` LIKE ?"
 local updateStoreOwnerVehicleQuery =
-"UPDATE `owned_vehicles` SET `parking` = ?, `vehicle` = ?, `stored` = 1, `type` = ?, `lastparking` = ? WHERE `plate` = ? or `fakeplate` = ?"
+"UPDATE `owned_vehicles` SET `parking` = ?, `vehicle` = ?, `stored` = 1, `type` = ? WHERE `plate` = ? or `fakeplate` = ?"
 
 --- Store Vehicle
 ---@param data any
@@ -186,7 +184,7 @@ function StoreOwnerVehicle(source, data, cb)
         end
 
         MySQL.update(updateStoreOwnerVehicleQuery,
-            { data.name, json.encode(data.props), data.type, result.parking, result.plate },
+            { data.name, json.encode(data.props), data.type,  result.plate },
             function(rowsChanged)
                 if rowsChanged > 0 then
                     Vehicles[result.plate] = nil
@@ -200,9 +198,11 @@ function StoreOwnerVehicle(source, data, cb)
     local isVehicle = false
 
     for _, result in ipairs(vehicles) do
-        if PlateEqual(result.plate, data.plate) or PlateEqual(result.fakeplate, data.plate) then
+        if (PlateEqual(result.plate, data.plate) or PlateEqual(result.fakeplate, data.plate)) and result.job == data.job then
+            if not result.parking then
+                result.parking = data.name
+            end
             isVehicle = true
-            data.props.plate = result.plate
             updateVehicle(result)
             break
         end
@@ -378,8 +378,10 @@ if Garages.AutoImpound.active then
                         if existingEntity and existingEntity ~= entity then
                             EntityExist = true
                             Entity(existingEntity).state.FadeEntity = { action = 'delete' }
-                            DeleteEntity(existingEntity)
-                            warn(('[ PLATE DUPLICATE ]  Entity: %s, Plate: %s'):format(existingEntity, data.plate))
+                            if Garages.Warn then
+                                warn(('[ PLATE DUPLICATE ]  Entity: %s, Plate: %s - Delete succesfully'):format(
+                                    existingEntity, data.plate))
+                            end
                             break
                         end
 
@@ -392,8 +394,10 @@ if Garages.AutoImpound.active then
                 end
 
                 if not EntityExist then
-                    warn(('[ ENTITY NOT EXIST ]  Vehicle impound: %s, plate: %s'):format(
-                        Garages.DefaultImpound[data.type], data.plate))
+                    if Garages.Warn then
+                        warn(('[ ENTITY NOT EXIST ]  Vehicle impound: %s, plate: %s'):format(
+                            Garages.DefaultImpound[data.type], data.plate))
+                    end
                     MySQL.update.await(updateAutoImpoundQuery, { Garages.DefaultImpound[data.type], info, data.plate })
                     Vehicles[data.plate] = {}
                 end

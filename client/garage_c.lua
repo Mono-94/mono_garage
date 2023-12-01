@@ -86,13 +86,15 @@ function OpenGarage(data)
     local vehiclesFound = false
     for i = 1, #owned_vehicles do
         local vehicle = owned_vehicles[i]
+        
         if vehicle.parking == data.name and data.type == vehicle.type and data.job == vehicle.job then
             local props = json.decode(vehicle.vehicle)
             local nameCar = GetDisplayNameFromVehicleModel(props.model)
             local markCar = GetMakeNameFromVehicleModel(props.model)
+            local cleanedPlate = (props.plate):gsub("^%s*(.-)%s*$", "%1")
             vehiclesFound = true
             table.insert(garagemenu, {
-                title = markCar .. ' - ' .. nameCar,
+                title = CapitalizeFirstLetter(markCar .. ' - ' .. nameCar),
                 icon = 'car',
                 iconColor = (vehicle.stored == 1) and '#32a852' or '#FF8787',
                 arrow = true,
@@ -115,8 +117,8 @@ function OpenGarage(data)
                     },
                 },
                 colorScheme = '#4ac76b',
-                description = vehicle.isOwner and Text('OwnerVehicle', props.plate) or
-                    Text('NotOwnerVehicle',vehicle.OwnerName, props.plate),
+                description = vehicle.isOwner and Text('OwnerVehicle', cleanedPlate) or
+                    Text('NotOwnerVehicle',vehicle.OwnerName, cleanedPlate),
                 onSelect = function()
                     data.nameCar = nameCar
                     data.markCar = markCar
@@ -143,7 +145,6 @@ end
 
 function VehicleSelect(data)
     local menu = {}
-    local veh = data.nameCar .. ' ' .. data.markCar
     if data.vehicle.stored == 1 then
         table.insert(menu, {
             title = Text('TakeVehicle'),
@@ -199,7 +200,7 @@ function VehicleSelect(data)
                     lib.callback('mono_garage:GetSpawnedVehicles', 1000, function(vehicles)
                         if vehicles then
                             for k, v in pairs(vehicles) do
-                                if data.plate == v.plate then
+                                if PlateEqual(data.plate, v.plate) then
                                     SetNewWaypoint(v.vec3.xy)
                                     Notifi('Vehículo marcado en el gps')
                                 end
@@ -226,7 +227,7 @@ function VehicleSelect(data)
                             })
                             if alert == 'confirm' then
                                 for k, v in pairs(vehicles) do
-                                    if data.plate == v.plate then
+                                    if PlateEqual(data.plate, v.plate) then
                                         impound.plate = v.plate
                                         impound.impound = data.defaultImpound
                                         impound.price = data.priceImpound
@@ -243,12 +244,11 @@ function VehicleSelect(data)
             })
         end
     end
-
-
+    
     lib.registerContext({
         id = 'mono_garage:VehicleSelect',
         menu = 'mono_garage:owned_vehicles',
-        title = data.nameCar .. ' ' .. data.markCar,
+        title = CapitalizeFirstLetter(data.nameCar .. ' ' .. data.markCar),
         options = menu
     })
 

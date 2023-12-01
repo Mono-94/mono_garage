@@ -1,8 +1,10 @@
 Garages                   = {}
 
-Garages.Lang              = 'ES'  -- ES/EN/PL/FR/IT/PT
+Garages.Lang              = 'ES' -- ES/EN/PL/FR/IT/PT
 
 Garages.Debug             = false
+
+Garages.Warn              = true  -- warn in console, entity not exist or plate duplicate
 
 Garages.TargetDistance    = 2
 
@@ -33,12 +35,15 @@ Garages.Commands          = {
 
 Garages.Buttons           = {
     carkeys = 'U',
-    engine = 'M'
+    engine  = 'M',
 }
 
 Garages.CarKeys           = {
-    isItem = true,
-    engine = true, -- only work isItem = true
+    isItem           = true,
+    engine           = true, -- only work isItem = true
+    CarKeyDistance   = 5,
+    CarKeyDelay      = 2000,
+    EngineStartDelay = 1000,
 }
 
 
@@ -57,7 +62,7 @@ Garages.AutoImpound        = {
     Reason = 'Mono Garage Impound'
 }
 
-Garages.ImpoundTarget     = {
+Garages.ImpoundTarget      = {
     Command = 'impound',
     ProgressBarTime = 5000,
     jobs = {
@@ -98,10 +103,6 @@ function LockPickDispatchFunction(source, Coords, PlayerId, VehicleEntity)
     print(source, Coords, PlayerId, VehicleEntity)
 end
 
----PlateEqual
----@param valueA string
----@param valueB string
----@return boolean
 function PlateEqual(valueA, valueB)
     valueA = tostring(valueA)
     valueB = tostring(valueB)
@@ -110,7 +111,6 @@ function PlateEqual(valueA, valueB)
     return valueA == valueB
 end
 
----Notifi
 function Notifi(data)
     lib.notify({
         title = data.title or 'Garaje',
@@ -130,4 +130,8 @@ end
 
 RegisterNetEvent('mono_garage:Notifi', Notifi)
 
-Garages.monogarage = true
+function CapitalizeFirstLetter(string)
+    return string:gsub("(%a)([%w_']*)", function(first, rest)
+        return first:upper() .. rest:lower()
+    end)
+end

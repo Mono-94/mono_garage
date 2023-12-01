@@ -10,9 +10,9 @@ Garages.Customs = {
             hash = 'a_m_y_dhill_01'
         },
         blip      = {
-            sprite = 474,
+            sprite = 226,
             size = 0.5,
-            color = 0
+            color = 2
         },
         garagepos = {
             vec3(-1104.0, -1680.0, 4.0),
@@ -27,12 +27,15 @@ Garages.Customs = {
             vec4(-1106.0260009766, -1691.8848876953, 3.3506450653076, 280.41430664063),
         },
         vehicles  = {
-            { name = 'BMX', model = 'BMX', plate = 'MON1RENT', priceMin = 5 },
-            { name = 'Faggio', model = 'faggio', plate = 'MON2RENT', priceMin = 10 }
+            { name = 'BMX', model = 'bmx', plate = 'MON1RENT', priceMin = 5 },
+            { name = 'Cruiser', model = 'cruiser', plate = 'MON2RENT', priceMin = 5 },
+            { name = 'Fixter', model = 'fixter', plate = 'MON3RENT', priceMin = 5 },
+            { name = 'Scorcher', model = 'scorcher', plate = 'MON4RENT', priceMin = 5 },
+            { name = 'Electric bike', model = 'inductor', plate = 'MON4RENT', priceMin = 10 },
         },
     },
     
-     --- Vehicles for jobs no owner
+     --[[ Vehicles for jobs no owner
     ['LSPD Vehicles Custom'] = {
         debug     = false,
         job       = 'police',
@@ -60,7 +63,7 @@ Garages.Customs = {
             { name = 'police', model = 'sultan', plate = 'MONO V20', grade = 1 },
             { name = 'police', model = 'sultan', plate = 'MONO V20', grade = 'boss' },
         },
-    },
+    },]]
     
 
 }

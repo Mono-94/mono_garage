@@ -33,32 +33,23 @@ function GetVehicleCategory(vehicle)
 end
 
 -- Create NPC
----@param NPCHash any
----@param NPCPos vector4
----@return number
-function CreateNPC(NPCHash, NPCPos)
-    RequestModel(NPCHash)
-    while not HasModelLoaded(NPCHash) do
+function CreateNPC(hash, coords)
+    RequestModel(hash)
+    while not HasModelLoaded(hash) do
         Wait(1)
     end
-    local NPC = CreatePed(2, NPCHash, NPCPos, false, false)
-    SetPedFleeAttributes(NPC, 0, 0)
-    SetPedDiesWhenInjured(NPC, false)
-    TaskStartScenarioInPlace(NPC, "missheistdockssetup1clipboard@base", 0, true)
-    SetPedKeepTask(NPC, true)
-    SetBlockingOfNonTemporaryEvents(NPC, true)
-    SetEntityInvincible(NPC, true)
-    FreezeEntityPosition(NPC, true)
-    return NPC
+    local entity = CreatePed(2, hash, coords, false, false)
+    SetPedFleeAttributes(entity, 0, 0)
+    SetPedDiesWhenInjured(entity, false)
+    TaskStartScenarioInPlace(entity, "missheistdockssetup1clipboard@base", 0, true)
+    SetPedKeepTask(entity, true)
+    SetBlockingOfNonTemporaryEvents(entity, true)
+    SetEntityInvincible(entity, true)
+    FreezeEntityPosition(entity, true)
+    return entity
 end
 
 ---Create Blip
----@param pos any
----@param sprite any
----@param scale any
----@param colorblip any
----@param blipName any
----@return number
 function CreateBlip(pos, sprite, scale, colorblip, blipName)
     local entity = AddBlipForCoord(pos)
     SetBlipSprite(entity, sprite)
@@ -95,12 +86,12 @@ AddStateBagChangeHandler('FadeEntity', nil, function(bagName, key, value, _unuse
 
     value.entity = entity
 
-    FadeInOut(value)
+    DeleteVehicleEntity(value)
 
     Entity(entity).state:set('FadeEntity', nil, true)
 end)
 
-AddStateBagChangeHandler('CarKeys', nil, function(bagName, key, value, _unused, replicated)
+AddStateBagChangeHandler('VehicleDoors', nil, function(bagName, key, value, _unused, replicated)
     if not value then return end
 
     local entity = GetEntityFromStateBagName(bagName)
@@ -109,12 +100,11 @@ AddStateBagChangeHandler('CarKeys', nil, function(bagName, key, value, _unused, 
 
     SetVehicleDoorsLocked(entity, value)
 
-    Entity(entity).state:set('CarKeys', nil, true)
+    Entity(entity).state:set('VehicleDoors', nil, true)
 end)
 
 ---FadeInFadeOutEntity
----@param data any
-function FadeInOut(data)
+function DeleteVehicleEntity(data)
     if data.action == 'spawn' then
         NetworkFadeInEntity(data.entity, true)
     elseif data.action == 'delete' then
@@ -136,7 +126,7 @@ function GetPlayerKey(vehicle)
     local Ped = PlayerPedId()
     local coords = GetEntityCoords(Ped)
     local inAcar = IsPedInAnyVehicle(Ped, true)
-    local entity = vehicle or lib.getClosestVehicle(coords, 5, true)
+    local entity = vehicle or lib.getClosestVehicle(coords, Garages.CarKeys.CarKeyDistance, true)
     local plate = GetVehicleNumberPlateText(entity)
     if Garages.inventory == 'ox' then
         local keys = ox:Search('slots', Garages.Items.carkeys)
@@ -159,57 +149,56 @@ end
 exports('GetPlayerKey', GetPlayerKey)
 
 function VehicleDoors()
-    local havekey, entity, inCar, ped = GetPlayerKey()
-    if not havekey then return end
+    local haveKey, entity, inCar, ped = GetPlayerKey()
+    if not haveKey or not DoesEntityExist(entity) then return end
+
     local nameCar = GetDisplayNameFromVehicleModel(GetEntityModel(entity))
     local markCar = GetMakeNameFromVehicleModel(GetEntityModel(entity))
-    local marca = nameCar .. ' - ' .. markCar
-    if entity then
-        lib.callback('mono_garage:CarDoors', 2000, function(succes)
-            if succes then
-                if DoesEntityExist(entity) then
-                    if GetVehicleDoorLockStatus(entity) == 2 then
-                        Entity(entity).state.CarKeys = 0
-                        PlayVehicleDoorCloseSound(entity, 1)
-                        PlaySoundFromEntity(-1, "Remote_Control_Close", entity, "PI_Menu_Sounds", 1, 0)
-                        Notifi({ title = marca, text = Text('VehicleOpen'), icon = 'lock-open', color = '#64cc69' })
-                    else
-                        Entity(entity).state.CarKeys = 2
-                        PlayVehicleDoorCloseSound(entity, 1)
-                        PlaySoundFromEntity(-1, "Remote_Control_Fob", entity, "PI_Menu_Sounds", 1, 0)
-                        Notifi({ title = marca, text = Text('VehicleClose'), icon = 'lock', color = '#cc6493' })
-                    end
-                    if not inCar then
-                        AnimKeys(ped)
-                    end
-                    SetVehicleLights(entity, 2)
-                    Citizen.Wait(250)
-                    SetVehicleLights(entity, 0)
-                    Citizen.Wait(250)
-                    SetVehicleLights(entity, 2)
-                    Citizen.Wait(250)
-                    SetVehicleLights(entity, 0)
-                    Citizen.Wait(750)
-                end
+    local marca = CapitalizeFirstLetter(nameCar .. ' - ' .. markCar)
+
+    lib.callback('mono_garage:CarDoors', Garages.CarKeys.CarKeyDelay, function(success)
+        if success then
+            local doorLockStatus = GetVehicleDoorLockStatus(entity)
+
+            Entity(entity).state.VehicleDoors = doorLockStatus == 2 and 0 or 2
+            PlayVehicleDoorCloseSound(entity, 1)
+            local soundEvent = doorLockStatus == 2 and "Remote_Control_Close" or "Remote_Control_Fob"
+            PlaySoundFromEntity(-1, soundEvent, entity, "PI_Menu_Sounds", 1, 0)
+
+            local notificationText = doorLockStatus == 2 and Text('VehicleOpen') or Text('VehicleClose')
+            local notificationColor = doorLockStatus == 2 and '#64cc69' or '#cc6493'
+            Notifi({
+                title = marca,
+                text = notificationText,
+                icon = doorLockStatus == 2 and 'lock-open' or 'lock',
+                color =
+                    notificationColor
+            })
+
+            if not inCar then
+                AnimKeys(ped)
             end
-        end, Garages.CarKeys.isItem, VehToNet(entity))
-    end
+
+            for _ = 1, 2 do
+                SetVehicleLights(entity, 2)
+                Citizen.Wait(250)
+                SetVehicleLights(entity, 0)
+                Citizen.Wait(250)
+            end
+        end
+    end, Garages.CarKeys.isItem, VehToNet(entity))
 end
 
 function AnimKeys(ped)
     RequestModel('p_car_keys_01')
 
-    while not HasModelLoaded('p_car_keys_01') do
-        Wait(1)
-    end
+    while not HasModelLoaded('p_car_keys_01') do Wait(1) end
+
     local prop = CreateObject('p_car_keys_01', 1.0, 1.0, 1.0, 1, 1, 0)
-
     RequestAnimDict("anim@mp_player_intmenu@key_fob@")
-
-    AttachEntityToEntity(prop, ped, GetPedBoneIndex(ped, 57005), 0.08, 0.039, 0.0, 0.0, 0.0, 0.0,
-        true, true, false, true, 1, true)
-    TaskPlayAnim(ped, "anim@mp_player_intmenu@key_fob@", "fob_click_fp", 8.0, 8.0, -1, 48, 1, false,
-        false, false)
+    AttachEntityToEntity(prop, ped, GetPedBoneIndex(ped, 57005), 0.08, 0.039, 0.0, 0.0, 0.0, 0.0, true, true, false, true,
+        1, true)
+    TaskPlayAnim(ped, "anim@mp_player_intmenu@key_fob@", "fob_click_fp", 8.0, 8.0, -1, 48, 1, false, false, false)
     Citizen.Wait(1000)
     DeleteObject(prop)
 end
@@ -222,38 +211,6 @@ lib.addKeybind({
         VehicleDoors()
     end
 })
--- toggleEngine
-local delayEngine = false
-lib.addKeybind({
-    name = 'mono_garage_engine',
-    description = Text('EngineKeyBind'),
-    defaultKey = Garages.Buttons.engine,
-    onPressed = function()
-        if not delayEngine then
-            local ped = cache.ped
-            local vehicle = cache.vehicle
-            local nameCar = GetDisplayNameFromVehicleModel(GetEntityModel(vehicle))
-            local markCar = GetMakeNameFromVehicleModel(GetEntityModel(vehicle))
-            local marca = nameCar .. ' - ' .. markCar
-            if GetPedInVehicleSeat(GetVehiclePedIsIn(ped), -1) == ped then
-                if not GetPlayerKey() then
-                    return Notifi({ text = Text('NoKeyOwner') })
-                end
-                if GetIsVehicleEngineRunning(vehicle) then
-                    SetVehicleEngineOn(vehicle, false, true, true)
-                    Notifi({ title = marca, text = Text('EngineOff'), icon = 'bolt', color = '#63591f' })
-                else
-                    SetVehicleEngineOn(vehicle, true, true, true)
-                    Notifi({ title = marca, text = Text('EngineOn'), icon = 'bolt', color = '#edd54a' })
-                end
-                delayEngine = true
-                Citizen.Wait(1000)
-                delayEngine = false
-            end
-        end
-    end
-})
-
 
 
 lib.callback.register('mono_garage:DelVehicleByPlate', function(plate)
@@ -263,7 +220,6 @@ lib.callback.register('mono_garage:DelVehicleByPlate', function(plate)
         centered = true,
         cancel = true
     })
-
     if alert == 'confirm' then
         local progressBarResult = lib.progressBar({
             duration = 1000,
@@ -275,12 +231,7 @@ lib.callback.register('mono_garage:DelVehicleByPlate', function(plate)
                 move = true
             },
         })
-
-        if progressBarResult then
-            return true
-        else
-            return false
-        end
+        if progressBarResult then return true else return false end
     else
         return false
     end
@@ -295,10 +246,11 @@ lib.callback.register('mono_garage:ClosetVehicles', function(radius)
     end
 end)
 
-local animDictLockPick = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@"
-local animLockPick = "machinic_loop_mechandplayer"
 
 lib.callback.register('mono_garage:FakePlate', function(data)
+    local animDictLockPick = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@"
+    local animLockPick = "machinic_loop_mechandplayer"
+
     if lib.progressBar({
             duration = 5000,
             label = Text('FakePlate4'),
@@ -328,8 +280,9 @@ end)
 
 local LockPicked = {}
 
-
 lib.callback.register('mono_garage:LockPick', function(entity)
+    local animDictLockPick = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@"
+    local animLockPick = "machinic_loop_mechandplayer"
     local status = GetVehicleDoorLockStatus(entity)
     local ped = cache.ped
     local plate = GetVehicleNumberPlateText(entity)
@@ -374,9 +327,9 @@ lib.callback.register('mono_garage:LockPick', function(entity)
         end
     end
 end)
+
 local animDicHotWire = "veh@std@ds@base"
 local animHotWire = "hotwire"
-
 
 lib.callback.register('mono_garage:HotWire', function(netId, isEngineRunning)
     local ped = cache.ped
@@ -403,6 +356,34 @@ end)
 
 
 if Garages.CarKeys.engine and Garages.CarKeys.isItem then
+    -- toggleEngine
+    local delayEngine = false
+    lib.addKeybind({
+        name = 'mono_garage_engine',
+        description = Text('EngineKeyBind'),
+        defaultKey = Garages.Buttons.engine,
+        onPressed = function()
+            local haveKey, vehicle, inCar, ped = GetPlayerKey()
+            if not haveKey then return end
+            if delayEngine then return end
+            local nameCar = GetDisplayNameFromVehicleModel(GetEntityModel(vehicle))
+            local markCar = GetMakeNameFromVehicleModel(GetEntityModel(vehicle))
+            local marca = CapitalizeFirstLetter(nameCar .. ' - ' .. markCar)
+            if GetPedInVehicleSeat(vehicle, -1) == ped then
+                if GetIsVehicleEngineRunning(vehicle) then
+                    SetVehicleEngineOn(vehicle, false, true, true)
+                    Notifi({ title = marca, text = Text('EngineOff'), icon = 'bolt', color = '#63591f' })
+                else
+                    SetVehicleEngineOn(vehicle, true, true, true)
+                    Notifi({ title = marca, text = Text('EngineOn'), icon = 'bolt', color = '#edd54a' })
+                end
+                delayEngine = true
+                Citizen.Wait(Garages.CarKeys.EngineStartDelay)
+                delayEngine = false
+            end
+        end
+    })
+
     CreateThread(function()
         while true do
             local vehicle = cache.vehicle
