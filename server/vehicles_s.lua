@@ -379,7 +379,7 @@ if Garages.AutoImpound.active then
                             EntityExist = true
                             Entity(existingEntity).state.FadeEntity = { action = 'delete' }
                             if Garages.Warn then
-                                warn(('[ PLATE DUPLICATE ]  Entity: %s, Plate: %s - Delete succesfully'):format(
+                                warn(('[ PLATE DUPLICATE ]  Entity: %s, Plate: %s - Delete Entity'):format(
                                     existingEntity, data.plate))
                             end
                             break
