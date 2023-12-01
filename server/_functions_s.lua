@@ -260,7 +260,7 @@ lib.addCommand(Garages.Commands.carTimer, {
             plate = props.plate,
             coords = coords,
             props = props,
-            source = source,
+            source = args.target,
             owner = args.owner,
             type = args.type,
             intocar = true
