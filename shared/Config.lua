@@ -1,6 +1,6 @@
 Garages                   = {}
 
-Garages.Lang              = 'ES' -- ES/EN/PL/FR/IT/PT
+Garages.Lang              = 'EN' -- ES/EN/PL/FR/IT/PT
 
 Garages.Debug             = false
 
