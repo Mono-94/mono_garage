@@ -4,15 +4,15 @@ local ox = exports.ox_inventory
 
 local Vehicles = {}
 --- GetAll Vehicles Spawned for mono_garage
----@return table data plate, entity, networkId, coords
+---@return table
 lib.callback.register('mono_garage:GetSpawnedVehicles', function()
     local data = {}
-    for k, v in pairs(Vehicles) do
-        data[k] = v
-        local coords = GetEntityCoords(v.entity)
-        local heading = GetEntityHeading(v.entity)
-        data[k].netId = NetworkGetNetworkIdFromEntity(v.entity)
-        data[k].coords = vec4(coords.x, coords.y, coords.z, heading)
+    for plate, veh in pairs(Vehicles) do
+        data[plate] = veh
+        data.vec3 = GetEntityCoords(veh.entity)
+        data.heading = GetEntityHeading(veh.entity)
+        data[plate].netId = NetworkGetNetworkIdFromEntity(veh.entity)
+        data[plate].vec4 = vec4(data.vec3.x, data.vec3.y, data.vec3.z, data.heading)
     end
     return data
 end)
@@ -38,7 +38,7 @@ function CreateVehicleServer(data, cb)
         PlayerToCar({ player = data.source, plate = data.plate, entity = data.entity, intocar = data.intocar })
 
 
-        SetVehicleNumberPlateText(data.entity, data.plate)
+        SetVehicleNumberPlateText(data.entity, data.plate or data.props.plate)
 
         while not PlateEqual(GetVehicleNumberPlateText(data.entity), data.plate) do
             SetVehicleNumberPlateText(data.entity, data.plate)
@@ -49,21 +49,25 @@ function CreateVehicleServer(data, cb)
 
 
         if data.owner then
-            local owner = SetOwner(data)
-            cb({
-                entity = data.entity,
-                netid = NetworkGetNetworkIdFromEntity(data.entity),
-                data = data,
-                isOwner = owner,
-                text = 'Vehiculo agregado a la base de datos y spawneado'
-            })
+            SetOwner(data)
+            if cb then
+                cb({
+                    entity = data.entity,
+                    netid = NetworkGetNetworkIdFromEntity(data.entity),
+                    data = data,
+                    isOwner = true,
+                    text = 'Vehiculo agregado a la base de datos y spawneado'
+                })
+            end
         else
-            cb({
-                entity = data.entity,
-                netid = NetworkGetNetworkIdFromEntity(data.entity),
-                data = data,
-                text = 'Vehiculo Spawneado'
-            })
+            if cb then
+                cb({
+                    entity = data.entity,
+                    netid = NetworkGetNetworkIdFromEntity(data.entity),
+                    data = data,
+                    text = 'Vehiculo Spawneado'
+                })
+            end
         end
     end)
 end
@@ -266,7 +270,6 @@ exports('FakePlate', function(event, item, inventory, slot, data)
             if result and #result > 0 then
                 lib.callback('mono_garage:FakePlate', inventory.id, function(success)
                     if success.success then
-                        print(success.success)
                         ox:RemoveItem(inventory.id, item, 1, itemSlot.metadata, slot)
                         MySQL.update(updateFakePlateQuery, { fakePlateValue, plate, player.identifier },
                             function(rowsChanged)
@@ -301,7 +304,7 @@ exports('FakePlate', function(event, item, inventory, slot, data)
                                 end
                             end)
                     end
-                end,true)
+                end, true)
             else
                 Notifi(inventory.id, Text('NotOwnerVeh'))
             end
@@ -376,8 +379,7 @@ if Garages.AutoImpound.active then
                             EntityExist = true
                             Entity(existingEntity).state.FadeEntity = { action = 'delete' }
                             DeleteEntity(existingEntity)
-                            Debug(('Matrícula duplicada con entidad diferente | Entity: %s, Plate: %s'):format(
-                                existingEntity, data.plate))
+                            warn(('[ PLATE DUPLICATE ]  Entity: %s, Plate: %s'):format(existingEntity, data.plate))
                             break
                         end
 
@@ -390,7 +392,8 @@ if Garages.AutoImpound.active then
                 end
 
                 if not EntityExist then
-                    print(('Vehicle impound: %s, plate: %s'):format(Garages.DefaultImpound[data.type], data.plate))
+                    warn(('[ ENTITY NOT EXIST ]  Vehicle impound: %s, plate: %s'):format(
+                        Garages.DefaultImpound[data.type], data.plate))
                     MySQL.update.await(updateAutoImpoundQuery, { Garages.DefaultImpound[data.type], info, data.plate })
                     Vehicles[data.plate] = {}
                 end

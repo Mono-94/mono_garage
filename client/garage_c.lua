@@ -200,7 +200,7 @@ function VehicleSelect(data)
                         if vehicles then
                             for k, v in pairs(vehicles) do
                                 if data.plate == v.plate then
-                                    SetNewWaypoint(v.coords.xy)
+                                    SetNewWaypoint(v.vec3.xy)
                                     Notifi('Vehículo marcado en el gps')
                                 end
                             end

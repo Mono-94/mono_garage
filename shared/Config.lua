@@ -129,3 +129,5 @@ function Notifi(data)
 end
 
 RegisterNetEvent('mono_garage:Notifi', Notifi)
+
+Garages.monogarage = true

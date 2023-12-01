@@ -37,7 +37,7 @@ lib.callback.register('mono_garage:CustomGarage', function(source, option, data)
     if data.job then
         local checkGrade = type(data.grade) == "number" and data.grade ~= job.grade
         local checkGradeName = type(data.grade) == "string" and data.grade ~= job.grade_name
-        if checkGrade or checkGradeName then 
+        if checkGrade or checkGradeName then
             Notifi(source, Text('CustomGarage6'))
             return false
         end
@@ -45,18 +45,20 @@ lib.callback.register('mono_garage:CustomGarage', function(source, option, data)
 
     if data.priceRent then
         local PlayerMoney = xPlayer.getMoney()
-        if PlayerMoney < data.priceRent then 
-            Notifi(source, Text('CustomGarage7')) 
+        if PlayerMoney < data.priceRent then
+            Notifi(source, Text('CustomGarage7'))
             return false
         end
         xPlayer.removeMoney(data.priceRent)
     end
 
     if option == 'spawn' then
-        print(option)
         local spawncoords = SpawnClearArea({ coords = data.spawnpos, distance = 2.0, player = source })
-        if not spawncoords then Notifi(source, Text('NoSpawnFree')) return false end
-        
+        if not spawncoords then
+            Notifi(source, Text('NoSpawnFree'))
+            return false
+        end
+
         CreateVehicleServer({
             model = data.model,
             plate = data.plate,
@@ -81,7 +83,6 @@ lib.callback.register('mono_garage:CustomGarage', function(source, option, data)
         PlayerOutCar({ entity = NetworkGetEntityFromNetworkId(data.entity), player = source, plate = data.plate })
         return false
     end
-    
 end)
 
 
@@ -149,34 +150,17 @@ end)
 
 lib.callback.register('mono_garage:CarDoors', function(source, action, entity)
     local vehicle = NetworkGetEntityFromNetworkId(entity)
-    local status = GetVehicleDoorLockStatus(vehicle)
     local plate = GetVehicleNumberPlateText(vehicle)
     if action then
-        if status == 2 then
-                 --   SetVehicleDoorsLocked(vehicle, 0)
-                 Entity(vehicle).state.CarKeys = 0
-            return true
-        elseif status == 0 or 1 then
-            Entity(vehicle).state.CarKeys = 2
-                 --   SetVehicleDoorsLocked(vehicle, 2)
-            return true
-        end
-    else
         local Owner = GetOwnerVehicles(source)
         for i = 1, #Owner do
             local vehicles = Owner[i]
             if PlateEqual(plate, vehicles.plate) or PlateEqual(plate, vehicles.fakeplate) then
-                if status == 2 then
-                 --   SetVehicleDoorsLocked(vehicle, 0)
-                    Entity(vehicle).state.CarKeys = 0
-                    return true
-                elseif status == 0 or 1 then
-                    Entity(vehicle).state.CarKeys = 2
-                 --   SetVehicleDoorsLocked(vehicle, 2)
-                    return true
-                end
+                return true
             end
         end
+    else
+        return true
     end
 end)
 

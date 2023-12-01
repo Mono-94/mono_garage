@@ -89,7 +89,6 @@ function InventoryKeys(action, data)
     }
     if Garages.CarKeys.isItem then
         if action == 'add' then
-            print('add', data.plate)
             if Garages.inventory == 'ox' then
                 ox:AddItem(data.player, itemKey, 1, metaData)
             elseif Garages.inventory == 'qs' then
@@ -98,7 +97,6 @@ function InventoryKeys(action, data)
                 -- custom
             end
         elseif action == 'remove' then
-            print('remove', data.plate)
             if Garages.inventory == 'ox' then
                 ox:RemoveItem(data.player, itemKey, 1, metaData)
             elseif Garages.inventory == 'qs' then
@@ -191,41 +189,25 @@ lib.addCommand(Garages.Commands.GiveCar, {
             optional = true,
         },
     },
-}, function(source, args)
-    local player = GetPlayerPed(args.target)
+}, function(source, data)
+    local player = GetPlayerPed(data.target)
     local playerpos = GetEntityCoords(player)
     local playerHeading = GetEntityHeading(player)
+    data.source = data.target
+    data.player = data.target
+    data.intocar = true
+    data.coords = { vec4(playerpos.x, playerpos.y, playerpos.z, playerHeading)}
+    data.distance = 2.0
+    data.props = { plate = GeneratePlate(), fuelLevel = 100, model = data.model }
+    data.plate = data.props.plate
+    data.coords = SpawnClearArea(data)
 
-    local coords = { vec4(playerpos.x, playerpos.y, playerpos.z, playerHeading) }
+    if data.owner == 'true' then data.owner = true else data.owner = false end
 
-    local props = { plate = GeneratePlate(), fuelLevel = 100, model = args.model }
-
-    if args.owner == 'true' then
-        args.owner = true
-    else
-        args.owner = false
-    end
-
-    local spawncoords = SpawnClearArea({ coords = coords, distance = 2.0, player = args.target })
-
-    if not spawncoords then
-        print('No Spawn')
-    else
-        CreateVehicleServer({
-            model = args.model,
-            plate = props.plate,
-            coords = spawncoords,
-            props = props,
-            source = args.target,
-            owner = args.owner,
-            type = args.type,
-            intocar = true
-        }, function(vehicle)
-            print(json.encode(vehicle))
-        end)
+    if not data.coords then return else
+        CreateVehicleServer(data)
     end
 end)
-
 lib.addCommand(Garages.Commands.carTimer, {
     help = Text('CommandCarTime'),
     restricted = 'admin',
@@ -301,7 +283,6 @@ lib.addCommand(Garages.Commands.DelDataBasePlate, {
                 if action then
                     MySQL.execute(deleteDeletePlateQuery, { result.plate })
                     Notifi(source, Text('CommandDelPlate3', result.plate))
-                    print(action, result.plate, result.plate)
                 end
             end, result.plate)
         end
@@ -433,3 +414,4 @@ MySQL.query(ShowColumnsQuery, {}, function(columns)
         warn(Text('DBCreate2'))
     end
 end)
+

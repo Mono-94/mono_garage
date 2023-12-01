@@ -1,3 +1,4 @@
+local ox = exports.ox_inventory
 if Garages.VehicleEntitys.densitiy then
     local SetVehicleDensityMultiplier = Garages.VehicleEntitys.SetVehicleDensityMultiplier
     local SetRandomVehicleDensityMultiplier = Garages.VehicleEntitys.SetRandomVehicleDensityMultiplier
@@ -11,9 +12,6 @@ if Garages.VehicleEntitys.densitiy then
         end
     end)
 end
-RegisterCommand('pl', function()
-    TriggerServerEvent('GeneratePlate')
-end)
 
 -- Get Vehicle type
 ---@param vehicle any
@@ -74,7 +72,6 @@ function CreateBlip(pos, sprite, scale, colorblip, blipName)
     return entity
 end
 
-
 AddStateBagChangeHandler('SetProperties', nil, function(bagName, key, value, _unused, replicated)
     if not value then return end
 
@@ -113,7 +110,6 @@ AddStateBagChangeHandler('CarKeys', nil, function(bagName, key, value, _unused, 
     SetVehicleDoorsLocked(entity, value)
 
     Entity(entity).state:set('CarKeys', nil, true)
-
 end)
 
 ---FadeInFadeOutEntity
@@ -136,67 +132,67 @@ end
 exports('ClientInventoryKeys', ClientInventoryKeys)
 
 ---Get Player Inventory Key
----@return boolean
-function GetPlayerKey()
-    local ped = cache.ped
-    local coords = GetEntityCoords(ped)
-    local closet = lib.getClosestVehicle(coords, 5, true)
-    local plate = GetVehicleNumberPlateText(closet)
+function GetPlayerKey(vehicle)
+    local Ped = PlayerPedId()
+    local coords = GetEntityCoords(Ped)
+    local inAcar = IsPedInAnyVehicle(Ped, true)
+    local entity = vehicle or lib.getClosestVehicle(coords, 5, true)
+    local plate = GetVehicleNumberPlateText(entity)
     if Garages.inventory == 'ox' then
-        local keys = exports.ox_inventory:Search('slots', Garages.Items.carkeys)
+        local keys = ox:Search('slots', Garages.Items.carkeys)
         for i, v in ipairs(keys) do
             if PlateEqual(v.metadata.plate, plate) then
-                return true
+                return true, entity, inAcar, Ped
             end
         end
     elseif Garages.inventory == 'qs' then
         local items = exports['qs-inventory']:getUserInventory()
         for item, meta in pairs(items) do
             if PlateEqual(meta.info.plate, plate) then
-                return true
+                return true, entity, inAcar, Ped
             end
         end
     end
-
-    return false
+    return false, entity, inAcar, Ped
 end
 
-function VehicleDoors()
-    local ped = cache.ped
-    local closet = lib.getClosestVehicle(GetEntityCoords(ped), 5, true)
-    local inCar = IsPedInAnyVehicle(ped, true)
-    local nameCar = GetDisplayNameFromVehicleModel(GetEntityModel(closet))
-    local markCar = GetMakeNameFromVehicleModel(GetEntityModel(closet))
-    local marca = nameCar .. ' - ' .. markCar
-    if closet then
-        if Garages.CarKeys.isItem then
-            if not GetPlayerKey() then return end
-        end
+exports('GetPlayerKey', GetPlayerKey)
 
+function VehicleDoors()
+    local havekey, entity, inCar, ped = GetPlayerKey()
+    if not havekey then return end
+    local nameCar = GetDisplayNameFromVehicleModel(GetEntityModel(entity))
+    local markCar = GetMakeNameFromVehicleModel(GetEntityModel(entity))
+    local marca = nameCar .. ' - ' .. markCar
+    if entity then
         lib.callback('mono_garage:CarDoors', 2000, function(succes)
-            if DoesEntityExist(closet) then
-                if GetVehicleDoorLockStatus(closet) == 2 then
-                    PlayVehicleDoorCloseSound(closet, 1)
-                    PlaySoundFromEntity(-1, "Remote_Control_Close", closet, "PI_Menu_Sounds", 1, 0)
-                    Notifi({ title = marca, text = Text('VehicleOpen'), icon = 'lock-open', color = '#64cc69' })
-                else
-                    PlayVehicleDoorCloseSound(closet, 1)
-                    PlaySoundFromEntity(-1, "Remote_Control_Fob", closet, "PI_Menu_Sounds", 1, 0)
-                    Notifi({ title = marca, text = Text('VehicleClose'), icon = 'lock', color = '#cc6493' })
+            if succes then
+                if DoesEntityExist(entity) then
+                    if GetVehicleDoorLockStatus(entity) == 2 then
+                        Entity(entity).state.CarKeys = 0
+                        PlayVehicleDoorCloseSound(entity, 1)
+                        PlaySoundFromEntity(-1, "Remote_Control_Close", entity, "PI_Menu_Sounds", 1, 0)
+                        Notifi({ title = marca, text = Text('VehicleOpen'), icon = 'lock-open', color = '#64cc69' })
+                    else
+                        Entity(entity).state.CarKeys = 2
+                        PlayVehicleDoorCloseSound(entity, 1)
+                        PlaySoundFromEntity(-1, "Remote_Control_Fob", entity, "PI_Menu_Sounds", 1, 0)
+                        Notifi({ title = marca, text = Text('VehicleClose'), icon = 'lock', color = '#cc6493' })
+                    end
+                    if not inCar then
+                        AnimKeys(ped)
+                    end
+                    SetVehicleLights(entity, 2)
+                    Citizen.Wait(250)
+                    SetVehicleLights(entity, 0)
+                    Citizen.Wait(250)
+                    SetVehicleLights(entity, 2)
+                    Citizen.Wait(250)
+                    SetVehicleLights(entity, 0)
+                    Citizen.Wait(750)
                 end
-                if not inCar then
-                    AnimKeys(ped)
-                end
-                SetVehicleLights(closet, 2)
-                Citizen.Wait(250)
-                SetVehicleLights(closet, 0)
-                Citizen.Wait(250)
-                SetVehicleLights(closet, 2)
-                Citizen.Wait(250)
-                SetVehicleLights(closet, 0)
-                Citizen.Wait(750)
             end
-        end, Garages.CarKeys.isItem, VehToNet(closet))
+        end, Garages.CarKeys.isItem, VehToNet(entity))
     end
 end
 
@@ -478,3 +474,5 @@ TryingToEnterVehicle = SetInterval(function()
         SetInterval(TryingToEnterVehicle, 500)
     end
 end, 0)
+
+
