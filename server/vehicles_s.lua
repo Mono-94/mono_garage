@@ -72,7 +72,8 @@ function CreateVehicleServer(data, cb)
     end)
 end
 
-local insertSetOwnerQuery = 'INSERT INTO `owned_vehicles` (owner, plate, vehicle, parking, type, job) VALUES (?, ?, ?, ?, ?, ?)'
+local insertSetOwnerQuery =
+'INSERT INTO `owned_vehicles` (owner, plate, vehicle, parking, type, job) VALUES (?, ?, ?, ?, ?, ?)'
 --- Set Vehicle owner
 ---@param data any
 ---@return unknown
@@ -84,6 +85,7 @@ function SetOwner(data)
 end
 
 local selectOwnerFriendQuery = "SELECT * FROM `owned_vehicles` WHERE `owner` = ? OR `friends` LIKE ?"
+local selectNameQuery = 'SELECT `firstname`, `lastname` FROM `users` WHERE `identifier` = ? LIMIT 1'
 --- Get Owner Vehicles
 ---@param source any
 ---@return table
@@ -96,7 +98,7 @@ function GetOwnerVehicles(source)
         local amigos = json.decode(result.amigos)
         local isOwner = result.owner == player.identifier
         local isFriend = false
-
+        local name = MySQL.single.await(selectNameQuery,{ result.owner })
         if not isOwner and amigos then
             for j, amigo in ipairs(amigos) do
                 if amigo.identifier == player.identifier then
@@ -108,14 +110,16 @@ function GetOwnerVehicles(source)
 
         result.isOwner = isOwner
         result.isFriend = isFriend
-        result.OwnerName = ESX.GetPlayerFromIdentifier(result.owner).getName()
+        result.OwnerName = name.firstname .. ' ' .. name.lastname
+        
     end
 
     return vehicles
 end
 
 local selectSpawnOwnertQuery = "SELECT * FROM `owned_vehicles` WHERE `plate` = ?"
-local updateSpawnOwnerQuery = "UPDATE `owned_vehicles` SET `stored` = 0, `pound` = NULL, `lastparking` = ? WHERE `plate` = ?"
+local updateSpawnOwnerQuery =
+"UPDATE `owned_vehicles` SET `stored` = 0, `pound` = NULL, `lastparking` = ? WHERE `plate` = ?"
 --- Spawn Vehicle
 ---@param data any plate/name garage
 ---@param cb function
@@ -137,7 +141,8 @@ function SpawnOwnerVehicle(data, cb)
 end
 
 local selectSpawnOwnerVehicleImpoundQuery = "SELECT * FROM `owned_vehicles` WHERE `plate` = ?"
-local updateSpawnOwnerVehicleImpoundQuery = "UPDATE `owned_vehicles` SET pound = NULL, `parking` = ?, `infoimpound` = NULL WHERE `plate` = ?"
+local updateSpawnOwnerVehicleImpoundQuery =
+"UPDATE `owned_vehicles` SET pound = NULL, `parking` = ?, `infoimpound` = NULL WHERE `plate` = ?"
 --- Spawn Vehicle Impound
 ---@param data any plate/name garage
 ---@param cb function
@@ -184,7 +189,7 @@ function StoreOwnerVehicle(source, data, cb)
         end
 
         MySQL.update(updateStoreOwnerVehicleQuery,
-            { data.name, json.encode(data.props), data.type,  result.plate },
+            { data.name, json.encode(data.props), data.type, result.plate },
             function(rowsChanged)
                 if rowsChanged > 0 then
                     Vehicles[result.plate] = nil

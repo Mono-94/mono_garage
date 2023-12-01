@@ -150,7 +150,7 @@ exports('GetPlayerKey', GetPlayerKey)
 
 function VehicleDoors()
     local haveKey, entity, inCar, ped = GetPlayerKey()
-    
+
     if not haveKey or not DoesEntityExist(entity) then return end
 
     local nameCar = GetDisplayNameFromVehicleModel(GetEntityModel(entity))
@@ -158,10 +158,9 @@ function VehicleDoors()
     local marca = CapitalizeFirstLetter(nameCar .. ' - ' .. markCar)
 
     lib.callback('mono_garage:CarDoors', Garages.CarKeys.CarKeyDelay, function(success)
-
         if success then
             local doorLockStatus = GetVehicleDoorLockStatus(entity)
-          
+
             Entity(entity).state.VehicleDoors = doorLockStatus == 2 and 0 or 2
             PlayVehicleDoorCloseSound(entity, 1)
             local soundEvent = doorLockStatus == 2 and "Remote_Control_Close" or "Remote_Control_Fob"
@@ -282,50 +281,52 @@ end)
 
 local LockPicked = {}
 
-lib.callback.register('mono_garage:LockPick', function(entity)
+lib.callback.register('mono_garage:LockPick', function()
+    local ped = PlayerPedId()
+    local coords = GetEntityCoords(ped)
+    local entity = lib.getClosestVehicle(coords, 3, true)
     local animDictLockPick = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@"
     local animLockPick = "machinic_loop_mechandplayer"
     local status = GetVehicleDoorLockStatus(entity)
     local ped = cache.ped
     local plate = GetVehicleNumberPlateText(entity)
     lib.requestAnimDict(animDictLockPick)
-    if status == 2 then
-        TaskPlayAnim(ped, animDictLockPick, animLockPick, 8.0, 8.0, -1, 48, 1,
-            false, false, false)
-        local success = lib.skillCheck(table.unpack(Garages.LockPickAndHotWire.LockPickSkillCheck))
-        if success then
-            if math.random() < Garages.LockPickAndHotWire.LockPickAlarmAndDispatchProbablity and not LockPicked[plate] then
-                SetVehicleAlarmTimeLeft(entity, true)
-                Citizen.Wait(100)
-                LockPickDispatchFunction(cache.serverId, cache.coords, cache.ped, entity)
+    if entity then
+        if status == 2 then
+            TaskPlayAnim(ped, animDictLockPick, animLockPick, 8.0, 8.0, -1, 48, 1,
+                false, false, false)
+            local success = lib.skillCheck(table.unpack(Garages.LockPickAndHotWire.LockPickSkillCheck))
+            if success then
+                if math.random() < Garages.LockPickAndHotWire.LockPickAlarmAndDispatchProbablity and not LockPicked[plate] then
+                    SetVehicleAlarmTimeLeft(entity, true)
+                    Citizen.Wait(100)
+                    LockPickDispatchFunction(cache.serverId, cache.coords, cache.ped, entity)
+                end
+                LockPicked[plate] = true
+                Notifi({ text = Text('VehicleOpen') })
+                Entity(entity).state.VehicleDoors = 0
+                ClearPedTasks(ped)
+                SetVehicleEngineOn(entity, false, true, true)
+            else
+                Notifi({ text = Text('FailThief') })
+                ClearPedTasks(ped)
             end
-            LockPicked[plate] = true
-            Notifi({ text = Text('VehicleOpen') })
-
-            ClearPedTasks(ped)
-            SetVehicleEngineOn(entity, false, true, true)
-            return success, status
-        else
-            Notifi({ text = Text('FailThief') })
-            ClearPedTasks(ped)
-            return success, status
-        end
-    elseif status == 0 or 1 then
-        TaskPlayAnim(ped, animDictLockPick, animLockPick, 8.0, 8.0, -1, 48, 1,
-            false, false, false)
-        local success = lib.skillCheck(table.unpack(Garages.LockPickAndHotWire.LockPickSkillCheck))
-        if success then
-            if math.random() < Garages.LockPickAndHotWire.HotWireAlarmProbablity and not LockPicked[plate] then
-                SetVehicleAlarmTimeLeft(entity, 5000)
+        elseif status == 0 or 1 then
+            TaskPlayAnim(ped, animDictLockPick, animLockPick, 8.0, 8.0, -1, 48, 1,
+                false, false, false)
+            local success = lib.skillCheck(table.unpack(Garages.LockPickAndHotWire.LockPickSkillCheck))
+            if success then
+                if math.random() < Garages.LockPickAndHotWire.HotWireAlarmProbablity and not LockPicked[plate] then
+                    SetVehicleAlarmTimeLeft(entity, 5000)
+                end
+                LockPicked[plate] = true
+                Notifi({ text = Text('VehicleClose') })
+                ClearPedTasks(ped)
+                Entity(entity).state.VehicleDoors = 2
+            else
+                Notifi({ text = Text('FailThief') })
+                ClearPedTasks(ped)
             end
-            LockPicked[plate] = true
-            Notifi({ text = Text('VehicleClose') })
-            ClearPedTasks(ped)
-            return success, status
-        else
-            Notifi({ text = Text('FailThief') })
-            ClearPedTasks(ped)
-            return success, status
         end
     end
 end)
@@ -457,5 +458,3 @@ TryingToEnterVehicle = SetInterval(function()
         SetInterval(TryingToEnterVehicle, 500)
     end
 end, 0)
-
-

@@ -86,7 +86,6 @@ function OpenGarage(data)
     local vehiclesFound = false
     for i = 1, #owned_vehicles do
         local vehicle = owned_vehicles[i]
-        
         if vehicle.parking == data.name and data.type == vehicle.type and data.job == vehicle.job then
             local props = json.decode(vehicle.vehicle)
             local nameCar = GetDisplayNameFromVehicleModel(props.model)

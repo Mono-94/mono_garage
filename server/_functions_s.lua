@@ -342,17 +342,7 @@ end)
 
 exports('LockPick', function(event, item, inventory, slot, data)
     if event == 'usingItem' then
-        local entity, vehicle = lib.callback.await('mono_garage:ClosetVehicles', inventory.id, 5)
-        local entity2 = NetworkGetEntityFromNetworkId(entity)
-        lib.callback('mono_garage:LockPick', inventory.id, function(success, status)
-            if success then
-                if status == 2 then
-                    Entity(entity2).state.VehicleDoors = 0
-                elseif status == 0 or 1 then
-                    Entity(entity2).state.VehicleDoors = 2
-                end
-            end
-        end, vehicle)
+        lib.callback('mono_garage:LockPick', inventory.id)
     end
 end)
 
