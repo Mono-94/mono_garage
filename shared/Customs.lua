@@ -27,10 +27,11 @@ Garages.Customs = {
             vec4(-1106.0260009766, -1691.8848876953, 3.3506450653076, 280.41430664063),
         },
         vehicles  = {
-            { name = 'BMX', model = 'BMX', plate = 'Rent A Car', priceMin = 10 }
+            { name = 'BMX', model = 'BMX', plate = 'MON1RENT', priceMin = 5 },
+            { name = 'Faggio', model = 'faggio', plate = 'MON2RENT', priceMin = 10 }
         },
     },
-    --[[
+    
      --- Vehicles for jobs no owner
     ['LSPD Vehicles Custom'] = {
         debug     = false,
@@ -60,6 +61,6 @@ Garages.Customs = {
             { name = 'police', model = 'sultan', plate = 'MONO V20', grade = 'boss' },
         },
     },
-    ]]
+    
 
 }

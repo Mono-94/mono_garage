@@ -27,13 +27,14 @@ for garage, data in pairs(Garages.Customs) do
                 groups = data.job,
                 distance = 5,
                 canInteract = function(entity, distance, coords, name, bone)
-                    --[[for k, v in pairs(data.vehicles) do
+                    for k, v in pairs(data.vehicles) do
                         if PlateEqual(v.plate, GetVehicleNumberPlateText(entity)) then
                             return entity, distance, coords, name, bone
                         end
-                    end]]
+                    end
                 end,
-                onSelect = function()
+                onSelect = function(veh)
+                    data.entity = veh.entity
                     SaveCustomVehicle(data)
                 end
             },
@@ -69,19 +70,20 @@ end
 local rent = false
 
 function SaveCustomVehicle(data)
+    local car = false
     if DoesEntityExist(data.entity) then
         data.plate = GetVehicleNumberPlateText(vehicle.entity)
         data.entity = NetworkGetNetworkIdFromEntity(vehicle.entity)
         for k, v in pairs(data.vehicles) do
             if PlateEqual(v.plate, data.plate) then
-                lib.callback('mono_garage:CustomGarage', nil, source, 'delete', data)
-                if not data.job then
-                    rent = false
-                end
-            else
-                Notifi('No puedes guardar este vehiculo aqui')
-                return
+                car = true
+                lib.callback('mono_garage:CustomGarage', false, nil, 'delete', data)
+                if not data.job then rent = false end
             end
+        end
+        if not car then
+            Notifi('No puedes guardar este vehiculo aqui')
+            return
         end
     end
 end

@@ -74,14 +74,13 @@ function CreateBlip(pos, sprite, scale, colorblip, blipName)
     return entity
 end
 
----StateBag Set Properties
+
 AddStateBagChangeHandler('SetProperties', nil, function(bagName, key, value, _unused, replicated)
     if not value then return end
 
     local entity = GetEntityFromStateBagName(bagName)
 
     if NetworkGetEntityOwner(entity) ~= PlayerId() then return end
-
 
     lib.setVehicleProperties(entity, value)
 
@@ -104,6 +103,19 @@ AddStateBagChangeHandler('FadeEntity', nil, function(bagName, key, value, _unuse
     Entity(entity).state:set('FadeEntity', nil, true)
 end)
 
+AddStateBagChangeHandler('CarKeys', nil, function(bagName, key, value, _unused, replicated)
+    if not value then return end
+
+    local entity = GetEntityFromStateBagName(bagName)
+
+    if NetworkGetEntityOwner(entity) ~= PlayerId() then return end
+
+    SetVehicleDoorsLocked(entity, value)
+
+    Entity(entity).state:set('CarKeys', nil, true)
+
+end)
+
 ---FadeInFadeOutEntity
 ---@param data any
 function FadeInOut(data)
@@ -111,6 +123,8 @@ function FadeInOut(data)
         NetworkFadeInEntity(data.entity, true)
     elseif data.action == 'delete' then
         NetworkFadeOutEntity(data.entity, true, true)
+        Citizen.Wait(1500)
+        DeleteEntity(data.entity)
     end
 end
 

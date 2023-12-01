@@ -29,12 +29,10 @@ lib.callback.register('mono_garage:SpawnOwnerVehicle', function(source, data)
 end)
 
 lib.callback.register('mono_garage:CustomGarage', function(source, option, data)
-    
     local xPlayer = ESX.GetPlayerFromId(source)
     local job = xPlayer.getJob()
 
     local props = { plate = data.plate, fuelLevel = 100 }
-   
 
     if data.job then
         local checkGrade = type(data.grade) == "number" and data.grade ~= job.grade
@@ -81,6 +79,7 @@ lib.callback.register('mono_garage:CustomGarage', function(source, option, data)
         return true
     elseif option == 'delete' then
         PlayerOutCar({ entity = NetworkGetEntityFromNetworkId(data.entity), player = source, plate = data.plate })
+        return false
     end
     
 end)
@@ -154,10 +153,12 @@ lib.callback.register('mono_garage:CarDoors', function(source, action, entity)
     local plate = GetVehicleNumberPlateText(vehicle)
     if action then
         if status == 2 then
-            SetVehicleDoorsLocked(vehicle, 0)
+                 --   SetVehicleDoorsLocked(vehicle, 0)
+                 Entity(vehicle).state.CarKeys = 0
             return true
         elseif status == 0 or 1 then
-            SetVehicleDoorsLocked(vehicle, 2)
+            Entity(vehicle).state.CarKeys = 2
+                 --   SetVehicleDoorsLocked(vehicle, 2)
             return true
         end
     else
@@ -166,10 +167,12 @@ lib.callback.register('mono_garage:CarDoors', function(source, action, entity)
             local vehicles = Owner[i]
             if PlateEqual(plate, vehicles.plate) or PlateEqual(plate, vehicles.fakeplate) then
                 if status == 2 then
-                    SetVehicleDoorsLocked(vehicle, 0)
+                 --   SetVehicleDoorsLocked(vehicle, 0)
+                    Entity(vehicle).state.CarKeys = 0
                     return true
                 elseif status == 0 or 1 then
-                    SetVehicleDoorsLocked(vehicle, 2)
+                    Entity(vehicle).state.CarKeys = 2
+                 --   SetVehicleDoorsLocked(vehicle, 2)
                     return true
                 end
             end

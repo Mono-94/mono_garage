@@ -27,7 +27,7 @@ function CreateVehicleServer(data, cb)
             wait(0)
         end
 
-        Entity(data.entity).state.fuel = data.props.fuelLevel or data.fuel
+        Entity(data.entity).state.fuel = data.props.fuelLevel or data.fuel or 100
 
         if data.props then
             Entity(data.entity).state.SetProperties = data.props

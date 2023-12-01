@@ -9,7 +9,7 @@
 
 - It is important to use the latest Gamebuild version.
 - In your server.cfg, add the following line: ```set sv_enforceGameBuild 2944```
-- Make sure to have the mono_garage script installed.
+- ensure mono_garage.
 - Automatically creates the necessary data in the database.
 
 # 📑Features
@@ -23,11 +23,11 @@
 - Command to remove a license plate from the database.
 - Command to spawn a vehicle with a timer to be removed after a specific time.
 - Command to send all vehicles of a type ("all", "air", "car", "boat") to a default garage.
-- Exportation *(Client/Server)* to create or delete keys.
-- Use of PolyZone or BoxZone in the garage position.
+- Export *(Client/Server)* to create or delete keys.
+- Use of PolyZone or BoxZone in the garage position (ox_lib).
 - Share vehicles with friends.
-- Vehicles: density(NPC Cars), doors, lockpick, hotwire, engine.
-- Keys work as items or through the database (50%).
+- Vehicles: density, doors, lockpick, hotwire, engine.
+- Keys work as items or through the database-> (50%).
 - Mark vehicle on the map if it's outside.
 - Send the vehicle to the impound if it's outside.
 - Fake license plate/FakePlate system, an item that sets a fake license plate with a timer to a owned vehicle. (You can store the vehicle with the fake license plate.)

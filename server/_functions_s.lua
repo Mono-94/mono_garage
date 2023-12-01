@@ -82,12 +82,14 @@ RegisterNetEvent('GeneratePlate', GeneratePlate)
 ---@param data any
 ---@param action any
 function InventoryKeys(action, data)
+    data.plate = string.gsub(data.plate, "%s", "")
     local metaData = {
         plate       = data.plate,
         description = Text('PlateMetadata', data.plate)
     }
     if Garages.CarKeys.isItem then
         if action == 'add' then
+            print('add', data.plate)
             if Garages.inventory == 'ox' then
                 ox:AddItem(data.player, itemKey, 1, metaData)
             elseif Garages.inventory == 'qs' then
@@ -96,14 +98,13 @@ function InventoryKeys(action, data)
                 -- custom
             end
         elseif action == 'remove' then
-            if PlateEqual(metaData.plate, data.plate) then
-                if Garages.inventory == 'ox' then
-                    ox:RemoveItem(data.player, itemKey, 1, metaData)
-                elseif Garages.inventory == 'qs' then
-                    exports['qs-inventory']:RemoveItem(data.player, itemKey, 1, nil, metaData)
-                elseif Garages.inventory == 'custom' then
-                    -- custom
-                end
+            print('remove', data.plate)
+            if Garages.inventory == 'ox' then
+                ox:RemoveItem(data.player, itemKey, 1, metaData)
+            elseif Garages.inventory == 'qs' then
+                exports['qs-inventory']:RemoveItem(data.player, itemKey, 1, nil, metaData)
+            elseif Garages.inventory == 'custom' then
+                -- custom
             end
         end
     end
@@ -155,10 +156,8 @@ function PlayerOutCar(data)
                     end
                     if DoesEntityExist(data.entity) then
                         Entity(data.entity).state.FadeEntity = { action = 'delete' }
-                        Citizen.Wait(1500)
-                        DeleteEntity(data.entity)
+                        break
                     end
-                    break
                 end
                 wait(0)
             end
@@ -366,9 +365,9 @@ exports('LockPick', function(event, item, inventory, slot, data)
         lib.callback('mono_garage:LockPick', inventory.id, function(success, status)
             if success then
                 if status == 2 then
-                    SetVehicleDoorsLocked(entity2, 0)
+                    Entity(vehicle).state.CarKeys = 0
                 elseif status == 0 or 1 then
-                    SetVehicleDoorsLocked(entity2, 2)
+                    Entity(vehicle).state.CarKeys = 2
                 end
             end
         end, vehicle)
