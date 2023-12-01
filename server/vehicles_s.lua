@@ -379,7 +379,7 @@ if Garages.AutoImpound.active then
                             EntityExist = true
                             Entity(existingEntity).state.FadeEntity = { action = 'delete' }
                             if Garages.Warn then
-                                warn(('[ PLATE DUPLICATE ]  Entity: %s, Plate: %s - Delete Entity'):format(
+                                print(('[^1PLATE DUPLICATE^7] ^3Entity: %s, Plate: %s - Delete Entity'):format(
                                     existingEntity, data.plate))
                             end
                             break
@@ -395,7 +395,7 @@ if Garages.AutoImpound.active then
 
                 if not EntityExist then
                     if Garages.Warn then
-                        warn(('[ ENTITY NOT EXIST ]  Vehicle impound: %s, plate: %s'):format(
+                        print(('[^1ENTITY NOT EXIST^7] ^3Vehicle impound: %s, plate: %s'):format(
                             Garages.DefaultImpound[data.type], data.plate))
                     end
                     MySQL.update.await(updateAutoImpoundQuery, { Garages.DefaultImpound[data.type], info, data.plate })
