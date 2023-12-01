@@ -50,9 +50,9 @@ Garages.CarKeys           = {
 Garages.VehicleEntitys     = {
     CloseAllDoors = true,
     densitiy = true,
-    SetVehicleDensityMultiplier = 1.0,
-    SetRandomVehicleDensityMultiplier = 1.0,
-    SetParkedVehicleDensityMultiplier = 1.0
+    SetVehicleDensityMultiplier = 0.0,
+    SetRandomVehicleDensityMultiplier = 0.0,
+    SetParkedVehicleDensityMultiplier = 0.0
 }
 
 Garages.AutoImpound        = {

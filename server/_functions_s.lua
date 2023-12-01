@@ -347,9 +347,9 @@ exports('LockPick', function(event, item, inventory, slot, data)
         lib.callback('mono_garage:LockPick', inventory.id, function(success, status)
             if success then
                 if status == 2 then
-                    Entity(vehicle).state.VehicleDoors = 0
+                    Entity(entity2).state.VehicleDoors = 0
                 elseif status == 0 or 1 then
-                    Entity(vehicle).state.VehicleDoors = 2
+                    Entity(entity2).state.VehicleDoors = 2
                 end
             end
         end, vehicle)

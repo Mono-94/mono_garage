@@ -15,7 +15,6 @@ lua54 'yes'
 shared_scripts {
 	'@ox_lib/init.lua',
 	'shared/*.lua',
-	'@mono/mono.lua'
 }
 
 client_scripts {
