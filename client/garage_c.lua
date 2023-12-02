@@ -1,63 +1,123 @@
+ESX = exports["es_extended"]:getSharedObject()
+
+RegisterNetEvent('esx:playerLoaded')
+AddEventHandler('esx:playerLoaded', function(xPlayer, isNew, skin)
+    ESX.PlayerData = xPlayer
+    Blip()
+end)
+
+RegisterNetEvent('esx:setJob', function(job, lastJob)
+    ESX.PlayerData.job.name = job.name
+    Blip()
+end)
+
+local blip = {}
+
+function Blip()
+    for garage, data in pairs(Garages.Garages) do
+        if data.blip then
+            local blipJob = (ESX.PlayerData.job.name == data.job) or (data.job == nil or false)
+            if DoesBlipExist(blip[garage]) then
+                RemoveBlip(blip[garage])
+            end
+            if data.type == 'car' then
+                if blipJob then 
+                    blip[garage] = CreateBlip(data.npc.pos.xyz, 50, 0.5, 31, Text('BlipGarage'))
+                end
+            elseif data.type == 'boat' then
+                if blipJob then
+                    blip[garage] = CreateBlip(data.npc.pos.xyz, 427, 0.5, 31, Text('BlipBoat'))
+                end
+            elseif data.type == 'air' then
+                if blipJob then
+                    blip[garage] = CreateBlip(data.npc.pos.xyz, 307, 0.5, 31, Text('BlipAir'))
+                end
+            end
+
+        end
+    end
+end
+
+Blip()
+
 for garage, data in pairs(Garages.Garages) do
     data.name = garage
-
-    if data.blip then
-        if data.type == 'car' then
-            CreateBlip(data.npc.pos.xyz, 50, 0.5, 31, Text('BlipGarage'))
-        elseif data.type == 'boat' then
-            CreateBlip(data.npc.pos.xyz, 427, 0.5, 31, Text('BlipBoat'))
-        elseif data.type == 'air' then
-            CreateBlip(data.npc.pos.xyz, 307, 0.5, 31, Text('BlipAir'))
+    function OnEnter()
+        if Garages.Options == 'textui' then
+            if (ESX.PlayerData.job.name == data.job) or (data.job == nil or false) then
+                TextUI('[ **E** ] ' .. Text('TargetPedOpen', garage) .. '  \n  [ **X** ] ' ..
+                    Text('TargetPedDeposit', garage))
+            end
+        elseif Garages.Options == 'target' then
+            GaragePed = CreateNPC(data.npc.hash, data.npc.pos)
+            exports.ox_target:addLocalEntity(GaragePed, {
+                {
+                    name = 'mono_garage:OpenGarage',
+                    groups = data.job,
+                    distance = Garages.TargetDistance,
+                    group = data.job,
+                    icon = 'fas fa-car',
+                    label = Text('TargetPedOpen', garage),
+                    onSelect = function()
+                        OpenGarage(data)
+                    end
+                }
+            })
+            exports.ox_target:addGlobalVehicle({
+                {
+                    name = 'mono_garage:SaveTarget',
+                    icon = 'fa-solid fa-road',
+                    label = Text('TargetPedDeposit', garage),
+                    groups = data.job,
+                    distance = Garages.TargetDistance,
+                    canInteract = function(entity, distance, coords, name, bone)
+                        if data.type == GetVehicleCategory(entity) then
+                            return entity, distance, coords, name, bone
+                        end
+                    end,
+                    onSelect = function(vehicle)
+                        data.entity = vehicle.entity
+                        SaveVehicle(data)
+                    end
+                },
+            })
         end
     end
 
-    function OnEnter()
-        GaragePed = CreateNPC(data.npc.hash, data.npc.pos)
-        exports.ox_target:addLocalEntity(GaragePed, {
-            {
-                name = 'mono_garage:OpenGarage',
-                groups = data.job,
-                distance = Garages.TargetDistance,
-                group = data.job,
-                icon = 'fas fa-car',
-                label = Text('TargetPedOpen', garage),
-                onSelect = function()
+    if Garages.Options == 'textui' then
+        function Inside()
+            if (ESX.PlayerData.job.name == data.job) or (data.job == nil or false) then
+                if IsControlJustPressed(0, 38) then
+                    if cache.vehicle then return end
                     OpenGarage(data)
                 end
-            }
-        })
-        exports.ox_target:addGlobalVehicle({
-            {
-                name = 'mono_garage:SaveTarget',
-                icon = 'fa-solid fa-road',
-                label = Text('TargetPedDeposit', garage),
-                groups = data.job,
-                distance = Garages.TargetDistance,
-                canInteract = function(entity, distance, coords, name, bone)
-                    if data.type == GetVehicleCategory(entity) then
-                        return entity, distance, coords, name, bone
+                if IsControlJustPressed(0, 73) then
+                    if cache.vehicle then
+                        data.entity = cache.vehicle
+                        SaveVehicle(data)
                     end
-                end,
-                onSelect = function(vehicle)
-                    data.entity = vehicle.entity
-                    SaveVehicle(data)
                 end
-            },
-        })
+            end
+        end
     end
 
     function OnExit()
-        DeleteEntity(GaragePed)
-        exports.ox_target:removeGlobalVehicle({ 'mono_garage:SaveTarget', 'mono_garage:OpenGarage' })
+        if Garages.Options == 'textui' then
+            HideTextUI()
+        elseif Garages.Options == 'target' then
+            DeleteEntity(GaragePed)
+            exports.ox_target:removeGlobalVehicle({ 'mono_garage:SaveTarget', 'mono_garage:OpenGarage' })
+        end
     end
 
-    if type(data.garagepos) == "table"  then
+    if type(data.garagepos) == "table" then
         lib.zones.poly({
             points = data.garagepos,
             thickness = data.thickness,
             debug = data.debug,
             onEnter = OnEnter,
             onExit = OnExit,
+            inside = Inside
         })
     else
         lib.zones.box({
@@ -67,6 +127,7 @@ for garage, data in pairs(Garages.Garages) do
             debug = data.debug,
             onEnter = OnEnter,
             onExit = OnExit,
+            inside = Inside
         })
     end
 end
@@ -117,7 +178,7 @@ function OpenGarage(data)
                 },
                 colorScheme = '#4ac76b',
                 description = vehicle.isOwner and Text('OwnerVehicle', cleanedPlate) or
-                    Text('NotOwnerVehicle',vehicle.OwnerName, cleanedPlate),
+                    Text('NotOwnerVehicle', vehicle.OwnerName, cleanedPlate),
                 onSelect = function()
                     data.nameCar = nameCar
                     data.markCar = markCar
@@ -243,7 +304,7 @@ function VehicleSelect(data)
             })
         end
     end
-    
+
     lib.registerContext({
         id = 'mono_garage:VehicleSelect',
         menu = 'mono_garage:owned_vehicles',

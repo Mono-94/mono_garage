@@ -8,32 +8,50 @@ for impound, data in pairs(Garages.Impound) do
     end
 
     function OnEnter()
-        ImpoundPed = CreateNPC(data.npc.hash, data.npc.pos)
-        exports.ox_target:addLocalEntity(ImpoundPed, {
-            {
-                name = 'mono_garage:TargetNpc_impound',
-                distance = Garages.TargetDistance,
-                icon = 'fas fa-car',
-                label = impound,
-                onSelect = function()
-                    OpenImpound(data)
-                end
-            }
-        })
+        if Garages.Options == 'textui' then
+            TextUI('[ **E** ] ' .. impound)
+        elseif Garages.Options == 'target' then
+            ImpoundPed = CreateNPC(data.npc.hash, data.npc.pos)
+            exports.ox_target:addLocalEntity(ImpoundPed,{
+                {
+                    name = 'mono_garage:TargetNpc_impound',
+                    distance = Garages.TargetDistance,
+                    icon = 'fas fa-car',
+                    label = impound,
+                    onSelect = function()
+                        OpenImpound(data)
+                    end
+                }
+            })
+        end
+    end
+
+    if Garages.Options == 'textui' then
+        function Inside()
+            if IsControlJustPressed(0, 38) then
+                if cache.vehicle then return end
+                OpenImpound(data)
+            end
+        end
     end
 
     function OnExit()
-        DeleteEntity(ImpoundPed)
-        exports.ox_target:removeGlobalVehicle({ 'mono_garage:TargetNpc_impound' })
+        if Garages.Options == 'textui' then
+            HideTextUI()
+        elseif Garages.Options == 'target' then
+            DeleteEntity(ImpoundPed)
+            exports.ox_target:removeGlobalVehicle({ 'mono_garage:TargetNpc_impound' })
+        end
     end
 
-    if type(data.garagepos) == "table"  then
+    if type(data.garagepos) == "table" then
         lib.zones.poly({
             points = data.garagepos,
             thickness = data.thickness,
             debug = data.debug,
             onEnter = OnEnter,
             onExit = OnExit,
+            inside = inside,
         })
     else
         lib.zones.box({
@@ -43,6 +61,7 @@ for impound, data in pairs(Garages.Impound) do
             debug = data.debug,
             onEnter = OnEnter,
             onExit = OnExit,
+            inside = Inside,
         })
     end
 end
@@ -65,9 +84,9 @@ function OpenImpound(data)
                 iconColor = '#32a852' or '#FF8787',
                 arrow = true,
                 metadata = {
-                    { label = Text('Date'),  value = data.infoimpound.date },
-                    { label = Text('Reason'),  value = data.infoimpound.reason },
-                    { label = Text('Price'), value = data.infoimpound.price .. ' $' }
+                    { label = Text('Date'),   value = data.infoimpound.date },
+                    { label = Text('Reason'), value = data.infoimpound.reason },
+                    { label = Text('Price'),  value = data.infoimpound.price .. ' $' }
                 },
                 colorScheme = '#4ac76b',
                 description = vehicle.isOwner and Text('OwnerVehicle', props.plate) or
@@ -103,7 +122,7 @@ function VehicleImpoundSelec(data)
         title = CapitalizeFirstLetter(data.nameCar .. ' ' .. data.markCar),
         options = {
             {
-                title = Text('CustomGarage2',data.nameCar .. ' ' .. data.markCar),
+                title = Text('CustomGarage2', data.nameCar .. ' ' .. data.markCar),
                 icon = 'car-side',
                 onSelect = function()
                     local input = lib.inputDialog(Text('SelectPaidType'), {
@@ -171,7 +190,7 @@ function ImpoundVehicle(vehicle)
         end
     end
 
-    local vehiclename = GetMakeNameFromVehicleModel(props.model) ..' - ' .. GetDisplayNameFromVehicleModel(props.model)
+    local vehiclename = GetMakeNameFromVehicleModel(props.model) .. ' - ' .. GetDisplayNameFromVehicleModel(props.model)
 
     local input = lib.inputDialog(Text('SetImpound1'), {
         {

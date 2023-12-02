@@ -1,12 +1,14 @@
-Garages                   = {}
+Garages                = {}
 
-Garages.Lang              = 'EN' -- ES/EN/PL/FR/IT/PT
+Garages.Lang           = 'EN'    -- ES/EN/PL/FR/IT/PT
 
-Garages.Debug             = false
+Garages.Debug          = false
 
-Garages.Warn              = true  -- warn in console, entity not exist or plate duplicate
+Garages.Warn           = true    -- warn in console, entity not exist or plate duplicate
 
-Garages.TargetDistance    = 2
+Garages.Options        = 'textui'
+
+Garages.TargetDistance = 2
 
 Garages.DefaultGarage     = {
     ['car'] = 'Pillbox Hill',
@@ -134,4 +136,14 @@ function CapitalizeFirstLetter(string)
     return string:gsub("(%a)([%w_']*)", function(first, rest)
         return first:upper() .. rest:lower()
     end)
+end
+
+function TextUI(text)
+    lib.showTextUI(text, {
+        icon = 'car',
+    })
+end
+
+function HideTextUI()
+    lib.hideTextUI()
 end
