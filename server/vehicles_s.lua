@@ -26,8 +26,11 @@ function CreateVehicleServer(data, cb)
         while not DoesEntityExist(data.entity) do
             wait(0)
         end
+       
 
-        SetFuelLevel(data.entity, data.props.fuelLevel or data.fuel or 100)
+        if ox_fuel == 'started' then
+            Entity(data.entity).state.fuel = data.props.fuelLevel or data.fuel or 100
+        end
 
         if data.props then
             Entity(data.entity).state.SetProperties = data.props

@@ -6,7 +6,9 @@ Garages.Debug          = false
 
 Garages.Warn           = true    -- warn in console, entity not exist or plate duplicate
 
-Garages.Options        = 'textui'
+Garages.RadialCopyCoords = false
+
+Garages.Options        = 'textui' -- target = ox_target / textui = default ox_lib textui the function is below
 
 Garages.TargetDistance = 2
 
@@ -48,7 +50,6 @@ Garages.CarKeys           = {
     EngineStartDelay = 1000,
 }
 
-
 Garages.VehicleEntitys     = {
     CloseAllDoors = true,
     densitiy = true,
@@ -83,7 +84,6 @@ Garages.Items              = {
 Garages.FakePlate          = {
     ItemFakeplate = 'fakeplate',
     timeoutMins = 1,
-
 }
 
 Garages.LockPickAndHotWire = {
@@ -108,9 +108,6 @@ end
 
 -- Add your custom FuelEvenet
 function SetFuelLevel(vehicle, fuelAmmount)
-   -- Ox_Fuel
-   Entity(vehicle).state.fuel = fuelAmmount
-
    -- print(vehicle, fuelAmmount)
 end
 

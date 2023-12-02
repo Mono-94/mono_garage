@@ -1,6 +1,6 @@
 Garages.Garages = {
 	
-		-- LSPD Owner vehicles
+		--[[LSPD Owner vehicles
 		['LSPD Vehicles'] = {
 		debug = false,
 		job = 'police',
@@ -23,7 +23,7 @@ Garages.Garages = {
         spawnpos  = {
             vec4(449.81292724609,-1018.3796386719,27.528268814087,330.99160766602)
         },
-    },
+    },]]
 	
 	['Pillbox Hill'] = {
 		debug = false,
