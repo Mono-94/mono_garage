@@ -106,8 +106,12 @@ function LockPickDispatchFunction(source, Coords, PlayerId, VehicleEntity)
 end
 
 
-function FuelLevel(entity, fuelAmmount)
-    print(entity, fuelAmmount)
+-- Add your custom FuelEvenet
+function SetFuelLevel(vehicle, fuelAmmount)
+   -- Ox_Fuel
+   Entity(vehicle).state.fuel = fuelAmmount
+
+   -- print(vehicle, fuelAmmount)
 end
 
 function PlateEqual(valueA, valueB)

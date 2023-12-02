@@ -1,7 +1,6 @@
 local Thread = Citizen.CreateThread
 local wait = Citizen.Wait
 local ox = exports.ox_inventory
-
 local Vehicles = {}
 --- GetAll Vehicles Spawned for mono_garage
 ---@return table
@@ -20,6 +19,7 @@ end)
 --- Create Vehicle Server
 ---@param cb function
 function CreateVehicleServer(data, cb)
+    local ox_fuel = GetResourceState('ox_fuel')
     Thread(function()
         data.entity = CreateVehicleServerSetter(data.model, "automobile", data.coords)
 
@@ -27,7 +27,7 @@ function CreateVehicleServer(data, cb)
             wait(0)
         end
 
-        Entity(data.entity).state.fuel = data.props.fuelLevel or data.fuel or 100
+        SetFuelLevel(data.entity, data.props.fuelLevel or data.fuel or 100)
 
         if data.props then
             Entity(data.entity).state.SetProperties = data.props
@@ -46,7 +46,6 @@ function CreateVehicleServer(data, cb)
         end
 
         Vehicles[data.plate] = { entity = data.entity, plate = data.plate }
-
 
         if data.owner then
             SetOwner(data)
@@ -98,7 +97,7 @@ function GetOwnerVehicles(source)
         local amigos = json.decode(result.amigos)
         local isOwner = result.owner == player.identifier
         local isFriend = false
-        local name = MySQL.single.await(selectNameQuery,{ result.owner })
+        local name = MySQL.single.await(selectNameQuery, { result.owner })
         if not isOwner and amigos then
             for j, amigo in ipairs(amigos) do
                 if amigo.identifier == player.identifier then
@@ -111,7 +110,6 @@ function GetOwnerVehicles(source)
         result.isOwner = isOwner
         result.isFriend = isFriend
         result.OwnerName = name.firstname .. ' ' .. name.lastname
-        
     end
 
     return vehicles
