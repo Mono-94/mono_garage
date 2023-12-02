@@ -8,7 +8,7 @@ Garages.Warn           = true    -- warn in console, entity not exist or plate d
 
 Garages.RadialCopyCoords = false
 
-Garages.Options        = 'textui' -- target = ox_target / textui = default ox_lib textui the function is below
+Garages.Options        = 'target' -- target = ox_target / textui = default ox_lib textui the function is below
 
 Garages.TargetDistance = 2
 

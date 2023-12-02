@@ -368,3 +368,10 @@ function SharedFriends(data)
     })
     lib.showContext('mono_garage:SharedFriends')
 end
+
+
+AddEventHandler('onResourceStart', function (resource)
+    if resource == GetCurrentResourceName() then
+        Blip()
+    end
+end)
