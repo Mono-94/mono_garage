@@ -74,6 +74,8 @@ AddStateBagChangeHandler('SetProperties', nil, function(bagName, key, value, _un
 
     SetVehicleEngineOn(entity, false, false, true)
 
+    FuelLevel(entity, value.fuelLevel)
+
     Entity(entity).state:set('SetProperties', nil, true)
 end)
 

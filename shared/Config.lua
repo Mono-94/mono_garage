@@ -105,6 +105,11 @@ function LockPickDispatchFunction(source, Coords, PlayerId, VehicleEntity)
     print(source, Coords, PlayerId, VehicleEntity)
 end
 
+
+function FuelLevel(entity, fuelAmmount)
+    print(entity, fuelAmmount)
+end
+
 function PlateEqual(valueA, valueB)
     valueA = tostring(valueA)
     valueB = tostring(valueB)

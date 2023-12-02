@@ -97,8 +97,8 @@ local rent = false
 function SaveCustomVehicle(data)
     local car = false
     if DoesEntityExist(data.entity) then
-        data.plate = GetVehicleNumberPlateText(vehicle.entity)
-        data.entity = NetworkGetNetworkIdFromEntity(vehicle.entity)
+        data.plate = GetVehicleNumberPlateText(data.entity)
+        data.entity = NetworkGetNetworkIdFromEntity(data.entity)
         for k, v in pairs(data.vehicles) do
             if PlateEqual(v.plate, data.plate) then
                 car = true

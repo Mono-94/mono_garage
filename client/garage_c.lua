@@ -1,50 +1,51 @@
-ESX = exports["es_extended"]:getSharedObject()
+local blip = {}
+
+local PlayerPedJob = nil
 
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded', function(xPlayer, isNew, skin)
-    ESX.PlayerData = xPlayer
+    print(xPlayer.job.name)
+    PlayerPedJob = xPlayer.job.name
     Blip()
 end)
 
 RegisterNetEvent('esx:setJob', function(job, lastJob)
-    ESX.PlayerData.job.name = job.name
+    PlayerPedJob = job.name
     Blip()
 end)
-
-local blip = {}
 
 function Blip()
     for garage, data in pairs(Garages.Garages) do
         if data.blip then
-            local blipJob = (ESX.PlayerData.job.name == data.job) or (data.job == nil or false)
             if DoesBlipExist(blip[garage]) then
                 RemoveBlip(blip[garage])
             end
             if data.type == 'car' then
-                if blipJob then 
+                if (PlayerPedJob == data.job) or (data.job == nil or false) then
                     blip[garage] = CreateBlip(data.npc.pos.xyz, 50, 0.5, 31, Text('BlipGarage'))
                 end
             elseif data.type == 'boat' then
-                if blipJob then
+                if (PlayerPedJob == data.job) or (data.job == nil or false) then
                     blip[garage] = CreateBlip(data.npc.pos.xyz, 427, 0.5, 31, Text('BlipBoat'))
                 end
             elseif data.type == 'air' then
-                if blipJob then
+                if (PlayerPedJob == data.job) or (data.job == nil or false) then
                     blip[garage] = CreateBlip(data.npc.pos.xyz, 307, 0.5, 31, Text('BlipAir'))
                 end
             end
-
         end
     end
 end
 
-Blip()
+if PlayerPedJob then
+    Blip()
+end
 
 for garage, data in pairs(Garages.Garages) do
     data.name = garage
     function OnEnter()
         if Garages.Options == 'textui' then
-            if (ESX.PlayerData.job.name == data.job) or (data.job == nil or false) then
+            if (PlayerPedJob == data.job) or (data.job == nil or false) then
                 TextUI('[ **E** ] ' .. Text('TargetPedOpen', garage) .. '  \n  [ **X** ] ' ..
                     Text('TargetPedDeposit', garage))
             end
@@ -86,7 +87,7 @@ for garage, data in pairs(Garages.Garages) do
 
     if Garages.Options == 'textui' then
         function Inside()
-            if (ESX.PlayerData.job.name == data.job) or (data.job == nil or false) then
+            if (PlayerPedJob == data.job) or (data.job == nil or false) then
                 if IsControlJustPressed(0, 38) then
                     if cache.vehicle then return end
                     OpenGarage(data)
