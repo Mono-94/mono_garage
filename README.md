@@ -13,7 +13,7 @@
 - Automatically creates the necessary data in the database.
 
 # 📑Features
-- Available languages: **ES** | **EN** | **PL** | **FR** | **IT** | **PT**
+- Available languages: **ES** | **EN** | **PL** | **FR** | **IT** | **DE** | **PT**
 - **[Garages]**: Garages for owned vehicles and jobs with owned vehicles.
 - **[Impound]**: Vehicle impound lots with various options.
 - **[Customs]**: Allows creating garages with vehicles from a list for jobs or setting up vehicle rental spots.
