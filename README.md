@@ -1,21 +1,15 @@
-# OBSOLOTO 
+# DEPRACATED 
 # NEW VERSION 
-https://github.com/Mono-94/mGarage
-https://github.com/Mono-94/mVehicle
-
-
-# OBSOLOTO 
+# https://github.com/Mono-94/mGarage
+# https://github.com/Mono-94/mVehicle
+# DEPRACATED 
 # NEW VERSION 
-https://github.com/Mono-94/mGarage
-https://github.com/Mono-94/mVehicle
-
-
-
-# OBSOLOTO 
+# https://github.com/Mono-94/mGarage
+# https://github.com/Mono-94/mVehicle
+# DEPRACATED 
 # NEW VERSION 
-https://github.com/Mono-94/mGarage
-https://github.com/Mono-94/mVehicle
-
+# https://github.com/Mono-94/mGarage
+# https://github.com/Mono-94/mVehicle
 
 # <center>   MONO  GARAGE V2
 
